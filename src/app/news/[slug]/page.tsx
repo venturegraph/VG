@@ -14,11 +14,15 @@ import {
   CaseStudyFunnelCard,
 } from '@/components';
 import {
-  getNewsArticleBySlug,
-  getRelatedNews,
   NAV_CATEGORIES,
   SECONDARY_NAV_ITEMS,
-} from '@/data/mockData';
+} from '@/lib/taxonomy';
+import { NewsArticle, Post } from '@/types';
+import DOMPurify from 'isomorphic-dompurify';
+
+interface ExtendedNewsArticle extends NewsArticle {
+  htmlContent?: string;
+}
 
 export default function NewsPage() {
   const params = useParams();
@@ -26,6 +30,9 @@ export default function NewsPage() {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [article, setArticle] = useState<ExtendedNewsArticle | null>(null);
+  const [relatedNews, setRelatedNews] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -55,13 +62,124 @@ export default function NewsPage() {
     });
   };
 
-  const article = getNewsArticleBySlug(slug);
+  useEffect(() => {
+    if (!slug) {
+      setIsLoading(false);
+      return;
+    }
+
+    const fetchNews = async () => {
+      setIsLoading(true);
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+
+        // 1. Fetch current news post from Supabase
+        const { data, error } = await supabase
+          .from('posts')
+          .select('*')
+          .eq('slug', slug)
+          .is('deleted_at', null)
+          .maybeSingle();
+
+        if (data && !error) {
+          const mapped: ExtendedNewsArticle = {
+            id: data.id,
+            title: data.title,
+            slug: data.slug,
+            type: 'funding',
+            category: data.category || 'Startup News',
+            publishDate: data.published_at
+              ? new Date(data.published_at).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })
+              : 'Recent',
+            timestamp: data.published_at
+              ? new Date(data.published_at).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })
+              : 'Recent Dispatch',
+            readTime: '4 min read',
+            excerpt: data.meta_description || data.title,
+            image: data.featured_image_url || undefined,
+            amount: data.total_raised || undefined,
+            author: {
+              name: 'Editorial Team',
+              role: 'Venture Graph Forensics',
+            },
+            htmlContent: data.content || '',
+            content: {
+              summary: data.meta_description || '',
+              body: (data.content || '').split('\n\n').filter(Boolean),
+            },
+          };
+          setArticle(mapped);
+
+          // 2. Fetch real related news from Supabase
+          const { data: relatedData } = await supabase
+            .from('posts')
+            .select('id, title, slug, content_type, category, published_at, meta_description, featured_image_url, total_raised')
+            .eq('content_type', 'news')
+            .eq('status', 'published')
+            .is('deleted_at', null)
+            .neq('slug', slug)
+            .order('published_at', { ascending: false })
+            .limit(4);
+
+          if (relatedData) {
+            setRelatedNews(
+              relatedData.map((item) => ({
+                id: item.id,
+                title: item.title,
+                slug: item.slug,
+                type: 'funding',
+                category: item.category || 'Startup News',
+                publishDate: item.published_at
+                  ? new Date(item.published_at).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })
+                  : 'Recent',
+                readTime: '4 min read',
+                excerpt: item.meta_description || item.title,
+                amount: item.total_raised || undefined,
+                image: item.featured_image_url || undefined,
+              }))
+            );
+          }
+        } else {
+          setArticle(null);
+        }
+      } catch (err) {
+        console.error('Error loading news article:', err);
+        setArticle(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, [slug]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background text-on-surface flex items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs text-secondary">Loading dispatch...</span>
+        </div>
+      </div>
+    );
+  }
 
   if (!article) {
     return notFound();
   }
-
-  const relatedNews = getRelatedNews(article.slug, 4);
 
   return (
     <div className="min-h-screen bg-background text-on-surface flex flex-col selection:bg-primary-container selection:text-on-primary">
@@ -190,11 +308,23 @@ export default function NewsPage() {
               </p>
             )}
 
-            {article.content.body.map((para, idx) => (
-              <p key={idx} className="text-on-surface-variant leading-relaxed">
-                {para}
-              </p>
-            ))}
+            {article.htmlContent && article.htmlContent.includes('<') ? (
+              <div
+                className="article-html-content font-body-base text-base text-on-surface-variant leading-relaxed max-w-3xl space-y-4"
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(article.htmlContent, {
+                    ADD_TAGS: ['iframe'],
+                    ADD_ATTR: ['target', 'rel', 'allowfullscreen', 'frameborder', 'data-type'],
+                  }),
+                }}
+              />
+            ) : (
+              article.content.body.map((para, idx) => (
+                <p key={idx} className="text-on-surface-variant leading-relaxed">
+                  {para}
+                </p>
+              ))
+            )}
 
             {/* Key Terms Box */}
             {article.content.keyTerms && article.content.keyTerms.length > 0 && (

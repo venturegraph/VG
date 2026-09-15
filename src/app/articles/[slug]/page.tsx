@@ -17,7 +17,7 @@ import {
 import {
   NAV_CATEGORIES,
   SECONDARY_NAV_ITEMS,
-} from '@/data/mockData';
+} from '@/lib/taxonomy';
 import { CaseStudyArticle, Post } from '@/types';
 import DOMPurify from 'isomorphic-dompurify';
 

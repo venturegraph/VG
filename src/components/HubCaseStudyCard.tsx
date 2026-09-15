@@ -1,13 +1,65 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getCaseStudyBySlug } from '@/data/mockData';
 
-interface HubCaseStudyCardProps {
-  caseStudySlug: string;
+export interface HubCaseStudySummary {
+  title: string;
+  slug: string;
+  category?: string;
+  excerpt?: string;
+  readTime?: string;
+  stats?: {
+    totalRaised?: string;
+  };
 }
 
-export const HubCaseStudyCard: React.FC<HubCaseStudyCardProps> = ({ caseStudySlug }) => {
-  const caseStudy = getCaseStudyBySlug(caseStudySlug);
+interface HubCaseStudyCardProps {
+  caseStudySlug?: string;
+  caseStudy?: HubCaseStudySummary | null;
+}
+
+export const HubCaseStudyCard: React.FC<HubCaseStudyCardProps> = ({
+  caseStudySlug,
+  caseStudy: initialCaseStudy,
+}) => {
+  const [caseStudy, setCaseStudy] = useState<HubCaseStudySummary | null>(initialCaseStudy || null);
+
+  useEffect(() => {
+    if (initialCaseStudy) {
+      setCaseStudy(initialCaseStudy);
+      return;
+    }
+    if (!caseStudySlug) {
+      setCaseStudy(null);
+      return;
+    }
+
+    const fetchCaseStudy = async () => {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        const { data } = await supabase
+          .from('posts')
+          .select('title, slug, category, meta_description')
+          .eq('slug', caseStudySlug)
+          .is('deleted_at', null)
+          .maybeSingle();
+
+        if (data) {
+          setCaseStudy({
+            title: data.title,
+            slug: data.slug,
+            category: data.category || 'Case Study',
+            excerpt: data.meta_description || data.title,
+            readTime: '6 min read',
+          });
+        }
+      } catch {
+        setCaseStudy(null);
+      }
+    };
+
+    fetchCaseStudy();
+  }, [caseStudySlug, initialCaseStudy]);
 
   if (!caseStudy) return null;
 
@@ -17,13 +69,13 @@ export const HubCaseStudyCard: React.FC<HubCaseStudyCardProps> = ({ caseStudySlu
       <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-3 border-b border-outline-variant/20 text-xs">
         <div className="flex items-center gap-2">
           <span className="px-2.5 py-0.5 rounded bg-on-secondary-fixed text-on-secondary font-label-sm text-[11px] uppercase font-bold tracking-wider">
-            {caseStudy.category}
+            {caseStudy.category || 'Case Study'}
           </span>
           <span className="font-label-sm uppercase tracking-wider text-primary font-bold text-[11px]">
             Primary Case Study
           </span>
         </div>
-        <span className="text-secondary font-label-sm">{caseStudy.readTime}</span>
+        <span className="text-secondary font-label-sm">{caseStudy.readTime || '6 min read'}</span>
       </div>
 
       {/* Case Study Title */}
@@ -40,7 +92,7 @@ export const HubCaseStudyCard: React.FC<HubCaseStudyCardProps> = ({ caseStudySlu
 
       {/* Stats row & Prominent CTA */}
       <div className="mt-4 pt-3 border-t border-outline-variant/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        {caseStudy.stats && (
+        {caseStudy.stats?.totalRaised && (
           <div className="text-xs text-secondary">
             Capital Lost:{' '}
             <span className="font-stat-lg font-bold text-error text-sm">
@@ -60,3 +112,4 @@ export const HubCaseStudyCard: React.FC<HubCaseStudyCardProps> = ({ caseStudySlu
     </aside>
   );
 };
+

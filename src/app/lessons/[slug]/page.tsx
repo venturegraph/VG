@@ -13,11 +13,15 @@ import {
   HubCaseStudyCard,
 } from '@/components';
 import {
-  getHubArticleBySlug,
-  getRelatedHubArticles,
   NAV_CATEGORIES,
   SECONDARY_NAV_ITEMS,
-} from '@/data/mockData';
+} from '@/lib/taxonomy';
+import { HubArticle } from '@/types';
+import DOMPurify from 'isomorphic-dompurify';
+
+interface ExtendedHubArticle extends HubArticle {
+  htmlContent?: string;
+}
 
 export default function LessonHubPage() {
   const params = useParams();
@@ -25,6 +29,9 @@ export default function LessonHubPage() {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [article, setArticle] = useState<ExtendedHubArticle | null>(null);
+  const [relatedHubArticles, setRelatedHubArticles] = useState<HubArticle[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -54,13 +61,115 @@ export default function LessonHubPage() {
     });
   };
 
-  const article = getHubArticleBySlug(slug);
+  useEffect(() => {
+    if (!slug) {
+      setIsLoading(false);
+      return;
+    }
+
+    const fetchLesson = async () => {
+      setIsLoading(true);
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+
+        // 1. Fetch target lesson post from Supabase
+        const { data, error } = await supabase
+          .from('posts')
+          .select('*')
+          .eq('slug', slug)
+          .is('deleted_at', null)
+          .maybeSingle();
+
+        if (data && !error) {
+          const mapped: ExtendedHubArticle = {
+            id: data.id,
+            title: data.title,
+            slug: data.slug,
+            category: data.category || 'Lessons & Insights',
+            subtitle: data.meta_description || '',
+            publishDate: data.published_at
+              ? new Date(data.published_at).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })
+              : 'Curated Guide',
+            readTime: '8 min read',
+            author: {
+              name: 'Editorial Team',
+              role: 'Venture Graph Research',
+            },
+            introduction: data.meta_description ? [data.meta_description] : [],
+            lessons: [],
+            htmlContent: data.content || '',
+          };
+          setArticle(mapped);
+
+          // 2. Fetch real related lessons from Supabase
+          const { data: relatedData } = await supabase
+            .from('posts')
+            .select('id, title, slug, category, meta_description, published_at')
+            .eq('content_type', 'lessons_hub')
+            .eq('status', 'published')
+            .is('deleted_at', null)
+            .neq('slug', slug)
+            .order('published_at', { ascending: false })
+            .limit(3);
+
+          if (relatedData) {
+            setRelatedHubArticles(
+              relatedData.map((item) => ({
+                id: item.id,
+                title: item.title,
+                slug: item.slug,
+                category: item.category || 'Lessons & Insights',
+                subtitle: item.meta_description || '',
+                publishDate: item.published_at
+                  ? new Date(item.published_at).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })
+                  : 'Curated Guide',
+                readTime: '7 min read',
+                author: {
+                  name: 'Editorial Team',
+                  role: 'Venture Graph Research',
+                },
+                introduction: [],
+                lessons: [],
+              }))
+            );
+          }
+        } else {
+          setArticle(null);
+        }
+      } catch (err) {
+        console.error('Error loading lesson hub article:', err);
+        setArticle(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLesson();
+  }, [slug]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background text-on-surface flex items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs text-secondary">Loading lesson guide...</span>
+        </div>
+      </div>
+    );
+  }
 
   if (!article) {
     return notFound();
   }
-
-  const relatedHubArticles = getRelatedHubArticles(article.slug);
 
   return (
     <div className="min-h-screen bg-background text-on-surface flex flex-col selection:bg-primary-container selection:text-on-primary">
@@ -148,14 +257,16 @@ export default function LessonHubPage() {
           </header>
 
           {/* Mobile Collapsible Table of Contents */}
-          <div className="lg:hidden">
-            <TableOfContents lessons={article.lessons} />
-          </div>
+          {article.lessons && article.lessons.length > 0 && (
+            <div className="lg:hidden">
+              <TableOfContents lessons={article.lessons} />
+            </div>
+          )}
 
-          {/* Main 2-Column Grid: Listicle Content (8 cols) & Desktop Sticky TOC (4 cols) */}
+          {/* Main Grid: Content & Desktop Sticky TOC */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-            {/* Left Column: Numbered List Items */}
-            <div className="lg:col-span-8 flex flex-col font-body-base text-base text-on-surface leading-relaxed">
+            {/* Left Column: Content */}
+            <div className={article.lessons && article.lessons.length > 0 ? "lg:col-span-8 flex flex-col font-body-base text-base text-on-surface leading-relaxed" : "lg:col-span-10 lg:col-start-2 flex flex-col font-body-base text-base text-on-surface leading-relaxed"}>
               {/* Introduction Paragraphs */}
               {article.introduction?.map((para, idx) => (
                 <p
@@ -170,59 +281,74 @@ export default function LessonHubPage() {
                 </p>
               ))}
 
-              {/* Numbered Lessons List */}
-              <div className="space-y-12 mt-4">
-                {article.lessons.map((lesson) => (
-                  <section
-                    key={lesson.id}
-                    id={lesson.id}
-                    className="p-6 sm:p-8 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm transition-colors scroll-mt-36"
-                  >
-                    {/* Number Badge & Title */}
-                    <div className="flex items-start gap-4 mb-4">
-                      <span className="font-display-hero text-3xl sm:text-4xl font-bold text-primary-container leading-none shrink-0 w-10">
-                        {lesson.number}
-                      </span>
-                      <div>
-                        <h2 className="font-headline-md text-xl sm:text-2xl text-on-surface font-semibold tracking-tight leading-snug">
-                          {lesson.title}
-                        </h2>
-                        {/* Thesis Statement */}
-                        <p className="mt-2 text-sm sm:text-base font-body-lead text-primary font-medium italic leading-relaxed">
-                          &ldquo;{lesson.thesis}&rdquo;
-                        </p>
-                      </div>
-                    </div>
+              {/* Real HTML Article Content from Supabase */}
+              {article.htmlContent && article.htmlContent.includes('<') ? (
+                <div
+                  className="article-html-content font-body-base text-base text-on-surface-variant leading-relaxed space-y-4 my-4"
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(article.htmlContent, {
+                      ADD_TAGS: ['iframe'],
+                      ADD_ATTR: ['target', 'rel', 'allowfullscreen', 'frameborder', 'data-type'],
+                    }),
+                  }}
+                />
+              ) : null}
 
-                    {/* Analysis Paragraphs */}
-                    <div className="space-y-3 mt-4 text-on-surface-variant text-sm sm:text-base leading-relaxed">
-                      {lesson.paragraphs.map((p, pIdx) => (
-                        <p key={pIdx}>{p}</p>
-                      ))}
-                    </div>
-
-                    {/* Actionable Playbook Takeaway Box */}
-                    {lesson.takeaway && (
-                      <div className="mt-5 p-4 rounded-xl bg-surface-container border border-outline-variant/30">
-                        <div className="text-[11px] font-bold uppercase tracking-wider text-primary font-label-sm mb-1 flex items-center gap-1.5">
-                          <span className="material-symbols-outlined text-[16px]">verified</span>
-                          Founder Playbook Takeaway
+              {/* Numbered Lessons List if structured */}
+              {article.lessons && article.lessons.length > 0 && (
+                <div className="space-y-12 mt-4">
+                  {article.lessons.map((lesson) => (
+                    <section
+                      key={lesson.id}
+                      id={lesson.id}
+                      className="p-6 sm:p-8 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm transition-colors scroll-mt-36"
+                    >
+                      {/* Number Badge & Title */}
+                      <div className="flex items-start gap-4 mb-4">
+                        <span className="font-display-hero text-3xl sm:text-4xl font-bold text-primary-container leading-none shrink-0 w-10">
+                          {lesson.number}
+                        </span>
+                        <div>
+                          <h2 className="font-headline-md text-xl sm:text-2xl text-on-surface font-semibold tracking-tight leading-snug">
+                            {lesson.title}
+                          </h2>
+                          {/* Thesis Statement */}
+                          <p className="mt-2 text-sm sm:text-base font-body-lead text-primary font-medium italic leading-relaxed">
+                            &ldquo;{lesson.thesis}&rdquo;
+                          </p>
                         </div>
-                        <p className="text-xs sm:text-sm font-semibold text-on-surface leading-relaxed">
-                          {lesson.takeaway}
-                        </p>
                       </div>
-                    )}
 
-                    {/* Prominent Outbound Case Study Hub Card */}
-                    {lesson.relatedCaseStudySlug && (
-                      <div className="mt-6 pt-4 border-t border-outline-variant/20">
-                        <HubCaseStudyCard caseStudySlug={lesson.relatedCaseStudySlug} />
+                      {/* Analysis Paragraphs */}
+                      <div className="space-y-3 mt-4 text-on-surface-variant text-sm sm:text-base leading-relaxed">
+                        {lesson.paragraphs.map((p, pIdx) => (
+                          <p key={pIdx}>{p}</p>
+                        ))}
                       </div>
-                    )}
-                  </section>
-                ))}
-              </div>
+
+                      {/* Actionable Playbook Takeaway Box */}
+                      {lesson.takeaway && (
+                        <div className="mt-5 p-4 rounded-xl bg-surface-container border border-outline-variant/30">
+                          <div className="text-[11px] font-bold uppercase tracking-wider text-primary font-label-sm mb-1 flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-[16px]">verified</span>
+                            Founder Playbook Takeaway
+                          </div>
+                          <p className="text-xs sm:text-sm font-semibold text-on-surface leading-relaxed">
+                            {lesson.takeaway}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Prominent Outbound Case Study Hub Card */}
+                      {lesson.relatedCaseStudySlug && (
+                        <div className="mt-6 pt-4 border-t border-outline-variant/20">
+                          <HubCaseStudyCard caseStudySlug={lesson.relatedCaseStudySlug} />
+                        </div>
+                      )}
+                    </section>
+                  ))}
+                </div>
+              )}
 
               {/* Conclusion Box */}
               {article.conclusion && (
@@ -236,9 +362,11 @@ export default function LessonHubPage() {
             </div>
 
             {/* Right Column: Desktop Sticky Table of Contents */}
-            <div className="hidden lg:block lg:col-span-4">
-              <TableOfContents lessons={article.lessons} />
-            </div>
+            {article.lessons && article.lessons.length > 0 && (
+              <div className="hidden lg:block lg:col-span-4">
+                <TableOfContents lessons={article.lessons} />
+              </div>
+            )}
           </div>
         </article>
 

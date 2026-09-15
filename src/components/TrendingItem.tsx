@@ -10,14 +10,21 @@ export const TrendingItem: React.FC<TrendingItemProps> = ({ item }) => {
   const isCaseStudy =
     item.slug.includes('failure') ||
     item.slug.includes('failed') ||
-    item.slug.includes('collapsed') ||
-    item.category.includes('Failure');
+    item.slug.includes('collapse') ||
+    item.slug.includes('fast-') ||
+    item.category.toLowerCase().includes('case study') ||
+    item.category.toLowerCase().includes('failure');
+
+  const isLesson =
+    item.slug.includes('lesson') ||
+    item.slug.includes('top-list') ||
+    item.category.toLowerCase().includes('lesson');
 
   const href = isCaseStudy
     ? `/articles/${item.slug}`
-    : item.slug.includes('anthropic')
-    ? `/news/${item.slug}`
-    : `/#${item.slug}`;
+    : isLesson
+    ? `/lessons/${item.slug}`
+    : `/news/${item.slug}`;
 
   return (
     <article className="flex items-start gap-4 group">

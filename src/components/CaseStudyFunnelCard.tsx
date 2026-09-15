@@ -1,15 +1,62 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getCaseStudyBySlug } from '@/data/mockData';
+
+export interface CaseStudySummary {
+  title: string;
+  slug: string;
+  category?: string;
+  excerpt?: string;
+  readTime?: string;
+}
 
 interface CaseStudyFunnelCardProps {
-  caseStudySlug: string;
+  caseStudySlug?: string;
+  caseStudy?: CaseStudySummary | null;
 }
 
 export const CaseStudyFunnelCard: React.FC<CaseStudyFunnelCardProps> = ({
   caseStudySlug,
+  caseStudy: initialCaseStudy,
 }) => {
-  const caseStudy = getCaseStudyBySlug(caseStudySlug);
+  const [caseStudy, setCaseStudy] = useState<CaseStudySummary | null>(initialCaseStudy || null);
+
+  useEffect(() => {
+    if (initialCaseStudy) {
+      setCaseStudy(initialCaseStudy);
+      return;
+    }
+    if (!caseStudySlug) {
+      setCaseStudy(null);
+      return;
+    }
+
+    const fetchCaseStudy = async () => {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        const { data } = await supabase
+          .from('posts')
+          .select('title, slug, category, meta_description')
+          .eq('slug', caseStudySlug)
+          .is('deleted_at', null)
+          .maybeSingle();
+
+        if (data) {
+          setCaseStudy({
+            title: data.title,
+            slug: data.slug,
+            category: data.category || 'Case Study',
+            excerpt: data.meta_description || data.title,
+            readTime: '6 min read',
+          });
+        }
+      } catch {
+        setCaseStudy(null);
+      }
+    };
+
+    fetchCaseStudy();
+  }, [caseStudySlug, initialCaseStudy]);
 
   if (!caseStudy) return null;
 
@@ -23,7 +70,7 @@ export const CaseStudyFunnelCard: React.FC<CaseStudyFunnelCardProps> = ({
           </span>
         </div>
         <span className="text-xs text-secondary font-label-sm">
-          {caseStudy.readTime}
+          {caseStudy.readTime || '6 min read'}
         </span>
       </div>
 
@@ -40,7 +87,7 @@ export const CaseStudyFunnelCard: React.FC<CaseStudyFunnelCardProps> = ({
 
       <div className="mt-5 pt-3 border-t border-outline-variant/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="text-xs text-secondary">
-          Category: <span className="font-semibold text-on-surface">{caseStudy.category}</span>
+          Category: <span className="font-semibold text-on-surface">{caseStudy.category || 'Case Study'}</span>
         </div>
 
         <Link
