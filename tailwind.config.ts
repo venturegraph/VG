@@ -57,6 +57,9 @@ const config: Config = {
         'background': 'rgb(var(--color-background) / <alpha-value>)',
         'on-primary-fixed-variant': 'rgb(var(--color-on-primary-fixed-variant) / <alpha-value>)',
         'primary': 'rgb(var(--color-primary) / <alpha-value>)',
+        // Brand constants — static hex, do NOT flip with dark mode
+        'slate-dark': '#21242E',
+        'accent-orange': '#FA654D',
       },
       borderRadius: {
         DEFAULT: '0.125rem',
@@ -65,6 +68,7 @@ const config: Config = {
         full: '0.75rem',
       },
       fontFamily: {
+        'masthead': ['Anton', 'Impact', 'sans-serif'],
         'display-hero': ['Newsreader', 'Georgia', 'serif'],
         'headline-lg': ['Newsreader', 'Georgia', 'serif'],
         'headline-md': ['Newsreader', 'Georgia', 'serif'],

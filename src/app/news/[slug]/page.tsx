@@ -6,7 +6,6 @@ import { notFound, useParams } from 'next/navigation';
 import {
   Header,
   MobileDrawer,
-  PrimaryNav,
   FundingCard,
   Newsletter,
   Footer,
@@ -36,10 +35,7 @@ export default function NewsPage() {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
-    if (
-      savedTheme === 'dark' ||
-      (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)
-    ) {
+    if (savedTheme === 'dark') {
       setIsDarkMode(true);
       document.documentElement.classList.add('dark');
     } else {
@@ -198,14 +194,8 @@ export default function NewsPage() {
         onClose={() => setIsMobileMenuOpen(false)}
       />
 
-      {/* Primary Navigation */}
-      <PrimaryNav
-        categories={NAV_CATEGORIES}
-        secondaryItems={SECONDARY_NAV_ITEMS}
-      />
-
       {/* Main Content Area (Tighter vertical padding for news) */}
-      <main className="w-full pt-44 bg-background min-h-screen flex-1 transition-colors duration-200">
+      <main className="w-full bg-background min-h-screen flex-1 transition-colors duration-200" style={{ paddingTop: 'var(--header-height, 11rem)' }}>
         <article className="w-full max-w-[1040px] mx-auto px-4 lg:px-6 py-6 lg:py-8">
           {/* Breadcrumb & Live Dispatch Pill */}
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3 text-xs font-label-sm">

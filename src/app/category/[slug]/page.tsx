@@ -6,7 +6,6 @@ import { useParams, useSearchParams } from 'next/navigation';
 import {
   Header,
   MobileDrawer,
-  PrimaryNav,
   FailureCard,
   FundingCard,
   Newsletter,
@@ -37,10 +36,7 @@ function CategoryView() {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
-    if (
-      savedTheme === 'dark' ||
-      (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)
-    ) {
+    if (savedTheme === 'dark') {
       setIsDarkMode(true);
       document.documentElement.classList.add('dark');
     } else {
@@ -283,14 +279,8 @@ function CategoryView() {
         onClose={() => setIsMobileMenuOpen(false)}
       />
 
-      {/* Two-Row Primary Nav */}
-      <PrimaryNav
-        categories={NAV_CATEGORIES}
-        secondaryItems={SECONDARY_NAV_ITEMS}
-      />
-
       {/* Main Content */}
-      <main className="w-full pt-44 bg-background min-h-screen flex-1 transition-colors duration-200">
+      <main className="w-full bg-background min-h-screen flex-1 transition-colors duration-200" style={{ paddingTop: 'var(--header-height, 11rem)' }}>
         <div className="w-full max-w-[1280px] mx-auto px-4 lg:px-6 py-8 lg:py-12">
           {/* Breadcrumb Navigation */}
           <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-xs text-secondary font-label-sm">

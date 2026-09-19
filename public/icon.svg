@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="14" fill="#21242E" />
+  <!-- Bold V mark -->
+  <polygon points="12,16 21,16 27,34 33,16 42,16 31,48 23,48" fill="#FFFFFF" />
+  <!-- Accent orange period dot -->
+  <circle cx="50" cy="44" r="5.5" fill="#FA654D" />
+</svg>

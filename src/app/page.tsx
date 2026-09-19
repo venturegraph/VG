@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Header,
   MobileDrawer,
-  PrimaryNav,
   Hero,
   FundingCard,
   FailureCard,
@@ -33,10 +32,7 @@ export default function HomePage() {
   useEffect(() => {
     // Check initial dark mode preference
     const savedTheme = localStorage.getItem('theme');
-    if (
-      savedTheme === 'dark' ||
-      (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)
-    ) {
+    if (savedTheme === 'dark') {
       setIsDarkMode(true);
       document.documentElement.classList.add('dark');
     } else {
@@ -192,14 +188,9 @@ export default function HomePage() {
         onClose={() => setIsMobileMenuOpen(false)}
       />
 
-      {/* Two-Row Category / Filter Bar (Sticky below header) */}
-      <PrimaryNav
-        categories={NAV_CATEGORIES}
-        secondaryItems={SECONDARY_NAV_ITEMS}
-      />
 
       {/* Main Content Area */}
-      <main className="w-full pt-44 bg-background min-h-screen flex-1 transition-colors duration-200">
+      <main className="w-full bg-background min-h-screen flex-1 transition-colors duration-200" style={{ paddingTop: 'var(--header-height, 11rem)' }}>
         {/* SECTION 1: HERO — SINGLE MOST RECENT CASE STUDY */}
         {heroStory ? (
           <Hero story={heroStory} />
