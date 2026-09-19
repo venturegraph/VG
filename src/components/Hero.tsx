@@ -18,6 +18,9 @@ export const Hero: React.FC<HeroProps> = ({ story }) => {
               alt={story.title}
               className="w-full h-full object-cover object-center opacity-45"
               src={story.image}
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-inverse-surface via-inverse-surface/80 to-transparent" />

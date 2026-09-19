@@ -141,24 +141,24 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-2.5 text-xs font-semibold text-white uppercase tracking-wider">
               <li>
-                <a href="#" className="hover:text-accent-orange transition-colors">
+                <Link href="/privacy-policy" className="hover:text-accent-orange transition-colors">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-accent-orange transition-colors">
+                <Link href="/cookie-policy" className="hover:text-accent-orange transition-colors">
                   Cookie Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-accent-orange transition-colors">
+                <Link href="/disclaimer" className="hover:text-accent-orange transition-colors">
                   Disclaimer
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-accent-orange transition-colors">
+                <Link href="/terms-of-service" className="hover:text-accent-orange transition-colors">
                   Terms of Service
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -175,12 +175,12 @@ export const Footer: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center gap-4 shrink-0">
-            <a href="#" className="hover:text-white transition-colors">
+            <Link href="/privacy-policy" className="hover:text-white transition-colors">
               Privacy Policy
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
+            </Link>
+            <Link href="/terms-of-service" className="hover:text-white transition-colors">
               Terms of Service
-            </a>
+            </Link>
           </div>
         </div>
       </div>

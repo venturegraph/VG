@@ -16,3 +16,5 @@ export * from './TableOfContents';
 export * from './HubCaseStudyCard';
 export * from './CategoryFilterPills';
 export * from './ArticleTableOfContents';
+export * from './CookieBanner';
+export * from './LegalPageLayout';

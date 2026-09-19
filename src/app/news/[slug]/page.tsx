@@ -1,397 +1,196 @@
-'use client';
+import { Metadata } from 'next';
+import { notFound, permanentRedirect } from 'next/navigation';
+import { createClient } from '@supabase/supabase-js';
+import { NewsView, ExtendedNewsArticle } from './NewsView';
+import { Post } from '@/types';
+import { stripHtml } from '@/lib/seo';
+import { getCanonicalPostPath, isNews } from '@/lib/routes';
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { notFound, useParams } from 'next/navigation';
-import {
-  Header,
-  MobileDrawer,
-  FundingCard,
-  Newsletter,
-  Footer,
-  FundingMetricsBar,
-  CaseStudyFunnelCard,
-} from '@/components';
-import {
-  NAV_CATEGORIES,
-  SECONDARY_NAV_ITEMS,
-} from '@/lib/taxonomy';
-import { NewsArticle, Post } from '@/types';
-import DOMPurify from 'isomorphic-dompurify';
-
-interface ExtendedNewsArticle extends NewsArticle {
-  htmlContent?: string;
+interface PageProps {
+  params: { slug: string };
 }
 
-export default function NewsPage() {
-  const params = useParams();
-  const slug = typeof params?.slug === 'string' ? params.slug : '';
+type NewsDataResult =
+  | { notFound: true; redirectUrl?: never; raw?: never; article?: never; relatedNews?: never }
+  | { redirectUrl: string; notFound?: never; raw?: never; article?: never; relatedNews?: never }
+  | { raw: any; article: ExtendedNewsArticle; relatedNews: Post[]; notFound?: never; redirectUrl?: never };
 
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [article, setArticle] = useState<ExtendedNewsArticle | null>(null);
-  const [relatedNews, setRelatedNews] = useState<Post[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+async function getNewsData(slug: string): Promise<NewsDataResult> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseAnonKey) return { notFound: true };
 
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      setIsDarkMode(true);
-      document.documentElement.classList.add('dark');
-    } else {
-      setIsDarkMode(false);
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
+  try {
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-  const handleToggleDarkMode = () => {
-    setIsDarkMode((prev) => {
-      const next = !prev;
-      if (next) {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
-      }
-      return next;
-    });
-  };
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('slug', slug)
+      .is('deleted_at', null)
+      .maybeSingle();
 
-  useEffect(() => {
-    if (!slug) {
-      setIsLoading(false);
-      return;
+    if (error || !data) return { notFound: true };
+
+    // Content type mismatch: redirect to canonical route
+    if (!isNews(data.content_type)) {
+      return {
+        redirectUrl: getCanonicalPostPath(data.content_type, data.slug),
+      };
     }
 
-    const fetchNews = async () => {
-      setIsLoading(true);
-      try {
-        const { createClient } = await import('@/lib/supabase/client');
-        const supabase = createClient();
-
-        // 1. Fetch current news post from Supabase
-        const { data, error } = await supabase
-          .from('posts')
-          .select('*')
-          .eq('slug', slug)
-          .is('deleted_at', null)
-          .maybeSingle();
-
-        if (data && !error) {
-          const mapped: ExtendedNewsArticle = {
-            id: data.id,
-            title: data.title,
-            slug: data.slug,
-            type: 'funding',
-            category: data.category || 'Startup News',
-            publishDate: data.published_at
-              ? new Date(data.published_at).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })
-              : 'Recent',
-            timestamp: data.published_at
-              ? new Date(data.published_at).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })
-              : 'Recent Dispatch',
-            readTime: '4 min read',
-            excerpt: data.meta_description || data.title,
-            image: data.featured_image_url || undefined,
-            amount: data.total_raised || undefined,
-            author: {
-              name: 'Editorial Team',
-              role: 'Venture Graph Forensics',
-            },
-            htmlContent: data.content || '',
-            content: {
-              summary: data.meta_description || '',
-              body: (data.content || '').split('\n\n').filter(Boolean),
-            },
-          };
-          setArticle(mapped);
-
-          // 2. Fetch real related news from Supabase
-          const { data: relatedData } = await supabase
-            .from('posts')
-            .select('id, title, slug, content_type, category, published_at, meta_description, featured_image_url, total_raised')
-            .eq('content_type', 'news')
-            .eq('status', 'published')
-            .is('deleted_at', null)
-            .neq('slug', slug)
-            .order('published_at', { ascending: false })
-            .limit(4);
-
-          if (relatedData) {
-            setRelatedNews(
-              relatedData.map((item) => ({
-                id: item.id,
-                title: item.title,
-                slug: item.slug,
-                type: 'funding',
-                category: item.category || 'Startup News',
-                publishDate: item.published_at
-                  ? new Date(item.published_at).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })
-                  : 'Recent',
-                readTime: '4 min read',
-                excerpt: item.meta_description || item.title,
-                amount: item.total_raised || undefined,
-                image: item.featured_image_url || undefined,
-              }))
-            );
-          }
-        } else {
-          setArticle(null);
-        }
-      } catch (err) {
-        console.error('Error loading news article:', err);
-        setArticle(null);
-      } finally {
-        setIsLoading(false);
-      }
+    const mappedArticle: ExtendedNewsArticle = {
+      id: data.id,
+      title: data.title,
+      slug: data.slug,
+      type: 'funding',
+      category: data.category || 'Startup News',
+      publishDate: data.published_at
+        ? new Date(data.published_at).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })
+        : 'Recent',
+      timestamp: data.published_at
+        ? new Date(data.published_at).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })
+        : 'Recent Dispatch',
+      readTime: '4 min read',
+      excerpt: data.meta_description || data.title,
+      image: data.featured_image_url || undefined,
+      amount: data.total_raised || undefined,
+      author: {
+        name: 'Editorial Team',
+        role: 'Venture Graph Forensics',
+      },
+      htmlContent: data.content || '',
+      content: {
+        summary: data.meta_description || '',
+        body: (data.content || '').split('\n\n').filter(Boolean),
+      },
     };
 
-    fetchNews();
-  }, [slug]);
+    // Fetch related news
+    const { data: relatedData } = await supabase
+      .from('posts')
+      .select('id, title, slug, content_type, category, published_at, meta_description, total_raised, featured_image_url')
+      .neq('content_type', 'case_study')
+      .neq('content_type', 'lessons_hub')
+      .neq('content_type', 'lessons')
+      .eq('status', 'published')
+      .is('deleted_at', null)
+      .neq('slug', slug)
+      .order('published_at', { ascending: false })
+      .limit(3);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background text-on-surface flex items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs text-secondary">Loading dispatch...</span>
-        </div>
-      </div>
-    );
+    const relatedNews: Post[] = (relatedData || []).map((item) => ({
+      id: item.id,
+      title: item.title,
+      slug: item.slug,
+      type: 'news',
+      category: item.category || 'Startup News',
+      publishDate: item.published_at
+        ? new Date(item.published_at).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })
+        : 'Recent',
+      readTime: '4 min read',
+      excerpt: item.meta_description || item.title,
+      amount: item.total_raised || undefined,
+      image: item.featured_image_url || undefined,
+    }));
+
+    return {
+      raw: data,
+      article: mappedArticle,
+      relatedNews,
+    };
+  } catch (err) {
+    console.error('Error in getNewsData:', err);
+    return { notFound: true };
+  }
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const result = await getNewsData(params.slug);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://venturegraph.me';
+
+  if (!result || result.notFound) {
+    return {
+      title: 'News Article Not Found',
+    };
   }
 
-  if (!article) {
-    return notFound();
+  if (result.redirectUrl) {
+    return {
+      title: 'Redirecting...',
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const post = result.raw;
+  const title = post.seo_title || post.title;
+  const description =
+    post.meta_description ||
+    (post.content ? stripHtml(post.content).slice(0, 155) + '...' : post.title);
+  const canonicalUrl = `${siteUrl}/news/${post.slug}`;
+  const ogImage = post.featured_image_url || `${siteUrl}/icon.png`;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      type: 'article',
+      url: canonicalUrl,
+      title: `${title} | Venture Graph`,
+      description,
+      publishedTime: post.published_at || undefined,
+      modifiedTime: post.updated_at || undefined,
+      images: [
+        {
+          url: ogImage,
+          alt: post.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} | Venture Graph`,
+      description,
+      images: [ogImage],
+    },
+  };
+}
+
+export default async function NewsPage({ params }: PageProps) {
+  const result = await getNewsData(params.slug);
+
+  if (!result || result.notFound) {
+    notFound();
+  }
+
+  if (result.redirectUrl) {
+    permanentRedirect(result.redirectUrl);
+  }
+
+  if (!result.article) {
+    notFound();
   }
 
   return (
-    <div className="min-h-screen bg-background text-on-surface flex flex-col selection:bg-primary-container selection:text-on-primary">
-      {/* Header */}
-      <Header
-        isDarkMode={isDarkMode}
-        onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
-        onToggleDarkMode={handleToggleDarkMode}
-      />
-
-      {/* Mobile Drawer */}
-      <MobileDrawer
-        categories={NAV_CATEGORIES}
-        isOpen={isMobileMenuOpen}
-        secondaryItems={SECONDARY_NAV_ITEMS}
-        onClose={() => setIsMobileMenuOpen(false)}
-      />
-
-      {/* Main Content Area (Tighter vertical padding for news) */}
-      <main className="w-full bg-background min-h-screen flex-1 transition-colors duration-200" style={{ paddingTop: 'var(--header-height, 11rem)' }}>
-        <article className="w-full max-w-[1040px] mx-auto px-4 lg:px-6 py-6 lg:py-8">
-          {/* Breadcrumb & Live Dispatch Pill */}
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 text-xs font-label-sm">
-            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-secondary">
-              <Link href="/" className="hover:text-primary transition-colors">
-                Home
-              </Link>
-              <span>/</span>
-              <Link href="/#new-fundings" className="hover:text-primary transition-colors">
-                Funding News
-              </Link>
-              <span>/</span>
-              <span className="text-on-surface truncate max-w-[200px] sm:max-w-xs">
-                {article.category}
-              </span>
-            </nav>
-
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-tertiary-container/20 text-tertiary font-label-sm font-semibold uppercase text-[11px]">
-                <span className="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse" />
-                Verified Dispatch
-              </span>
-            </div>
-          </div>
-
-          {/* Article Header (Denser, Timely) */}
-          <header className="mb-6">
-            {/* Tag / Category Badge (FundingCard pill style) */}
-            <div className="flex flex-wrap items-center gap-2 mb-3">
-              <span className="px-2.5 py-0.5 rounded bg-surface-container-high text-on-surface font-label-sm text-[11px] font-semibold uppercase">
-                {article.category}
-              </span>
-              {article.metrics?.capitalType && (
-                <span className="text-xs font-mono font-bold text-tertiary uppercase tracking-wider">
-                  • {article.metrics.capitalType}
-                </span>
-              )}
-            </div>
-
-            {/* Headline */}
-            <h1 className="font-headline-lg text-2xl sm:text-3xl lg:text-4xl text-on-surface tracking-tight leading-snug font-semibold">
-              {article.title}
-            </h1>
-
-            {/* Timely Timestamps & Author Row */}
-            <div className="mt-3 pt-3 border-t border-outline-variant/20 flex flex-wrap items-center justify-between gap-3 text-xs text-secondary">
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                <span className="font-medium text-on-surface flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[15px] text-tertiary">schedule</span>
-                  {article.timestamp}
-                </span>
-                {article.updatedTime && (
-                  <>
-                    <span>•</span>
-                    <span className="text-primary font-semibold">{article.updatedTime}</span>
-                  </>
-                )}
-                <span>•</span>
-                <span>{article.readTime}</span>
-              </div>
-
-              {article.author && (
-                <div className="flex items-center gap-2">
-                  <span className="text-on-surface-variant font-medium">By {article.author.name}</span>
-                  <span className="text-[11px] text-secondary">({article.author.role})</span>
-                </div>
-              )}
-            </div>
-          </header>
-
-          {/* Funding Metrics Bar (Visual treatment adapted from FundingCard) */}
-          {article.metrics && <FundingMetricsBar metrics={article.metrics} />}
-
-          {/* Compact Hero Image */}
-          {article.image && (
-            <div className="mb-6 rounded-xl overflow-hidden border border-outline-variant/30 bg-surface-container-lowest shadow-sm">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                alt={article.title}
-                className="w-full h-auto max-h-[320px] object-cover object-center"
-                src={article.image}
-              />
-              <div className="px-4 py-2 bg-surface-container-low border-t border-outline-variant/20 text-[11px] text-secondary flex items-center justify-between">
-                <span>Infrastructure &amp; Capital movement intelligence</span>
-                <span>Venture Graph Wire</span>
-              </div>
-            </div>
-          )}
-
-          {/* Case Study Funnel Module (When article references a startup that has a full case study) */}
-          {article.relatedCaseStudySlug && (
-            <CaseStudyFunnelCard caseStudySlug={article.relatedCaseStudySlug} />
-          )}
-
-          {/* Article News Body (Fast-paced, readable journalistic style) */}
-          <div className="font-body-base text-base text-on-surface leading-relaxed max-w-3xl space-y-4">
-            {article.content.summary && (
-              <p className="font-body-lead text-lg text-on-surface font-normal leading-relaxed border-l-2 border-tertiary pl-4 py-1 italic bg-surface-container-low/50 rounded-r">
-                {article.content.summary}
-              </p>
-            )}
-
-            {article.htmlContent && article.htmlContent.includes('<') ? (
-              <div
-                className="article-html-content font-body-base text-base text-on-surface-variant leading-relaxed max-w-3xl space-y-4"
-                dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(article.htmlContent, {
-                    ADD_TAGS: ['iframe'],
-                    ADD_ATTR: ['target', 'rel', 'allowfullscreen', 'frameborder', 'data-type'],
-                  }),
-                }}
-              />
-            ) : (
-              article.content.body.map((para, idx) => (
-                <p key={idx} className="text-on-surface-variant leading-relaxed">
-                  {para}
-                </p>
-              ))
-            )}
-
-            {/* Key Terms Box */}
-            {article.content.keyTerms && article.content.keyTerms.length > 0 && (
-              <div className="my-6 p-4 rounded-xl bg-surface-container-lowest border border-outline-variant/30">
-                <h3 className="font-headline-sm text-sm font-semibold text-on-surface uppercase tracking-wider mb-3 font-label-sm">
-                  Key Round Disclosures &amp; Terms
-                </h3>
-                <div className="divide-y divide-outline-variant/20 text-xs">
-                  {article.content.keyTerms.map((term) => (
-                    <div key={term.label} className="py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                      <span className="font-medium text-secondary">{term.label}</span>
-                      <span className="font-semibold text-on-surface">{term.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Executive Quote */}
-            {article.content.quote && (
-              <blockquote className="my-6 p-5 rounded-xl bg-surface-container border-l-4 border-l-tertiary text-on-surface">
-                <p className="font-display-hero text-lg italic leading-snug">
-                  &ldquo;{article.content.quote.text}&rdquo;
-                </p>
-                <footer className="mt-3 text-xs text-secondary font-label-md">
-                  <span className="font-semibold text-on-surface">{article.content.quote.author}</span> —{' '}
-                  {article.content.quote.role}
-                </footer>
-              </blockquote>
-            )}
-
-            {/* Wire Verification Notice */}
-            <div className="pt-4 border-t border-outline-variant/20 text-xs text-secondary leading-relaxed">
-              <span className="font-semibold text-on-surface">Verification:</span> Figures reported reflect audited filings, direct stakeholder confirmations, or company disclosures published on the date indicated above.
-            </div>
-          </div>
-        </article>
-
-        {/* SECTION: RELATED FUNDING ALERTS */}
-        {relatedNews.length > 0 && (
-          <section className="w-full bg-surface-container-low py-10 lg:py-14 border-t border-b border-outline-variant/30 transition-colors mt-8">
-            <div className="max-w-[1280px] mx-auto px-4 lg:px-6">
-              <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="w-2.5 h-2.5 bg-tertiary rounded-full" />
-                    <span className="font-label-sm text-xs uppercase tracking-widest text-secondary font-bold">
-                      Capital Movement
-                    </span>
-                  </div>
-                  <h2 className="font-headline-lg text-2xl lg:text-3xl text-on-surface tracking-tight font-semibold">
-                    Related Funding Alerts
-                  </h2>
-                </div>
-                <Link
-                  href="/#new-fundings"
-                  className="font-body-sm text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
-                >
-                  View all fundings <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {relatedNews.map((item) => (
-                  <FundingCard key={item.id} item={item} />
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Newsletter Section */}
-        <Newsletter />
-      </main>
-
-      {/* Footer */}
-      <Footer />
-    </div>
+    <NewsView
+      slug={params.slug}
+      initialArticle={result.article}
+      initialRelatedNews={result.relatedNews}
+    />
   );
 }

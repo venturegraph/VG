@@ -1,10 +1,44 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { CookieBanner } from '@/components/CookieBanner';
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://venturegraph.me';
 
 export const metadata: Metadata = {
-  title: 'Venture Graph | Startup Post-Mortems, Funding Intelligence & Founder Playbooks',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: 'Venture Graph | Startup Post-Mortems, Funding Intelligence & Founder Playbooks',
+    template: '%s | Venture Graph',
+  },
   description:
     'Unvarnished post-mortems, funding alerts, and actionable playbooks for founders and investors.',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: siteUrl,
+    siteName: 'Venture Graph',
+    title: 'Venture Graph | Startup Post-Mortems, Funding Intelligence & Founder Playbooks',
+    description:
+      'Unvarnished post-mortems, funding alerts, and actionable playbooks for founders and investors.',
+    images: [
+      {
+        url: '/icon.png',
+        width: 512,
+        height: 512,
+        alt: 'Venture Graph Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Venture Graph | Startup Post-Mortems, Funding Intelligence & Founder Playbooks',
+    description:
+      'Unvarnished post-mortems, funding alerts, and actionable playbooks for founders and investors.',
+    images: ['/icon.png'],
+  },
   icons: {
     icon: '/icon.png',
     apple: '/icon.png',
@@ -34,6 +68,7 @@ export default function RootLayout({
       </head>
       <body className="bg-background font-body-base text-body-base text-on-surface antialiased transition-colors duration-200">
         {children}
+        <CookieBanner />
       </body>
     </html>
   );

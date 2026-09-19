@@ -234,9 +234,9 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Wordmark — VENTURE GRAPH (two words with intentional space) */}
           <Link href="/" className="group inline-block">
-            <h1 className="font-masthead text-[48px] sm:text-[68px] md:text-[88px] lg:text-[100px] text-slate-dark dark:text-white tracking-tight uppercase select-none leading-none transition-opacity group-hover:opacity-90">
+            <span className="font-masthead text-[48px] sm:text-[68px] md:text-[88px] lg:text-[100px] text-slate-dark dark:text-white tracking-tight uppercase select-none leading-none transition-opacity group-hover:opacity-90 block">
               VENTURE{' '}GRAPH
-            </h1>
+            </span>
           </Link>
         </div>
 

@@ -1,14 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 
 export const Newsletter: React.FC = () => {
   const [email, setEmail] = useState('');
+  const [consent, setConsent] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
+    if (email && consent) {
       setIsSubscribed(true);
       setEmail('');
     }
@@ -45,24 +47,48 @@ export const Newsletter: React.FC = () => {
             </div>
           ) : (
             <form
-              className="w-full md:w-auto flex flex-col sm:flex-row gap-2.5 shrink-0"
+              className="w-full md:w-auto flex flex-col shrink-0 max-w-md"
               onSubmit={handleSubmit}
             >
-              <input
-                aria-label="Email address"
-                className="px-4 py-3 bg-white/5 border border-white/20 text-white placeholder:text-gray-500 text-sm focus:outline-none focus:border-accent-orange transition-colors min-w-[260px]"
-                placeholder="Enter your email address"
-                required
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <button
-                className="px-6 py-3 bg-accent-orange hover:opacity-90 text-white text-[11px] font-extrabold uppercase tracking-widest transition-opacity shrink-0 cursor-pointer"
-                type="submit"
-              >
-                Subscribe
-              </button>
+              <div className="flex flex-col sm:flex-row gap-2.5">
+                <input
+                  aria-label="Email address"
+                  className="px-4 py-3 bg-white/5 border border-white/20 text-white placeholder:text-gray-500 text-sm focus:outline-none focus:border-accent-orange transition-colors min-w-[260px] flex-1"
+                  placeholder="Enter your email address"
+                  required
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <button
+                  className="px-6 py-3 bg-accent-orange hover:opacity-90 disabled:opacity-50 text-white text-[11px] font-extrabold uppercase tracking-widest transition-opacity shrink-0 cursor-pointer"
+                  disabled={!consent}
+                  type="submit"
+                >
+                  Subscribe
+                </button>
+              </div>
+
+              {/* GDPR / CAN-SPAM Consent Checkbox */}
+              <label className="flex items-start gap-2.5 mt-3 cursor-pointer text-xs text-gray-400 select-none">
+                <input
+                  type="checkbox"
+                  required
+                  checked={consent}
+                  onChange={(e) => setConsent(e.target.checked)}
+                  className="mt-0.5 w-3.5 h-3.5 rounded border border-white/30 bg-white/5 text-accent-orange accent-[#FA654D] cursor-pointer"
+                />
+                <span className="leading-snug">
+                  I agree to receive the weekly email dispatch and accept the{' '}
+                  <Link
+                    href="/privacy-policy"
+                    className="text-accent-orange underline hover:opacity-80 transition-opacity font-medium"
+                  >
+                    Privacy Policy
+                  </Link>
+                  . Unsubscribe anytime.
+                </span>
+              </label>
             </form>
           )}
         </div>
