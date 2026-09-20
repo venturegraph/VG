@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { NavCategory, SecondaryNavItem } from '@/types';
 
 interface MobileDrawerProps {
@@ -16,6 +18,8 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   categories,
   secondaryItems,
 }) => {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
   // Track open state of accordions by category title
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({});
 
@@ -72,17 +76,19 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
       >
         {/* Drawer Header */}
         <div className="p-4 border-b border-outline-variant/30 flex items-center justify-between">
-          <a className="flex items-center" href="#" onClick={onClose}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+          <a className="flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded" href="/" onClick={onClose}>
+            <Image
               alt="Venture Graph Logo"
               className="h-7 w-auto object-contain"
               src="https://lh3.googleusercontent.com/aida/AEtjO1XP8QDymFpqagarXnm65HMbh8X8tFtZWFtrczWEyA1vqfSkrN3ZDVdZx292_TzSYRuaRWHjlCGUTBfeaQryI-xSLhJjW03-FtCRLHAZGUA9S8H0A74T2_koIRN2bSjeJ2R1AIAwkz_WH2HJw2UziWtf01RYu_HRc_bOPE1CBjY8x9GT013sf2A60ij3t73BNec66eZV8XzN5V0AZbawYcmcFP6vavI_jJ-I9w9nURywyEFiUvaBQdi5WZlF"
+              width={120}
+              height={28}
+              unoptimized
             />
           </a>
           <button
             aria-label="Close mobile menu"
-            className="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded transition-colors"
+            className="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             id="mobile-menu-close-btn"
             type="button"
             onClick={onClose}
@@ -93,16 +99,28 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
 
         {/* Drawer Search */}
         <div className="p-4 border-b border-outline-variant/20 bg-surface-container-low">
-          <div className="relative flex items-center">
-            <span className="material-symbols-outlined absolute left-3 text-secondary text-[18px]">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchQuery.trim()) {
+                onClose();
+                router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+              }
+            }}
+            className="relative flex items-center"
+          >
+            <span className="material-symbols-outlined absolute left-3 text-secondary text-[18px] pointer-events-none">
               search
             </span>
             <input
-              className="w-full pl-9 pr-3 py-2 text-xs bg-surface-container-lowest rounded-lg border border-outline-variant/40 placeholder:text-on-surface-variant/60 focus:outline-none focus:border-primary text-on-surface"
-              placeholder="Search startups, rounds..."
+              className="w-full pl-9 pr-3 py-2 text-xs bg-surface-container-lowest rounded-lg border border-outline-variant/40 placeholder:text-on-surface-variant/60 focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary text-on-surface"
+              placeholder="Search startups, rounds... (Press Enter)"
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              aria-label="Search archive"
             />
-          </div>
+          </form>
         </div>
 
         {/* Drawer Navigation Links */}
@@ -118,7 +136,8 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
               return (
                 <div key={category.title} className="border-b border-outline-variant/20">
                   <button
-                    className="mobile-accordion-btn w-full py-2.5 px-2 flex items-center justify-between text-sm font-semibold text-on-surface hover:text-primary transition-colors text-left"
+                    aria-expanded={isExpanded ? 'true' : 'false'}
+                    className="mobile-accordion-btn w-full py-2.5 px-2 flex items-center justify-between text-sm font-semibold text-on-surface hover:text-primary transition-colors text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
                     type="button"
                     onClick={() => toggleAccordion(category.title)}
                   >

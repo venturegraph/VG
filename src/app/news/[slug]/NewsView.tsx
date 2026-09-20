@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Header,
   MobileDrawer,
@@ -11,6 +12,7 @@ import {
   FundingMetricsBar,
   CaseStudyFunnelCard,
 } from '@/components';
+import { CopyLinkButton } from '@/components/CopyLinkButton';
 import {
   NAV_CATEGORIES,
   SECONDARY_NAV_ITEMS,
@@ -83,7 +85,7 @@ export function NewsView({
       />
 
       {/* Main Content Area */}
-      <main className="w-full bg-background min-h-screen flex-1 transition-colors duration-200" style={{ paddingTop: 'var(--header-height, 11rem)' }}>
+      <main id="main-content" className="w-full bg-background min-h-screen flex-1 transition-colors duration-200" style={{ paddingTop: 'var(--header-height, 11rem)' }}>
         <article className="w-full max-w-[1040px] mx-auto px-4 lg:px-6 py-6 lg:py-8">
           {/* Breadcrumb & Live Dispatch Pill */}
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3 text-xs font-label-sm">
@@ -145,12 +147,15 @@ export function NewsView({
                 <span>{article.readTime}</span>
               </div>
 
-              {article.author && (
-                <div className="flex items-center gap-2">
-                  <span className="text-on-surface-variant font-medium">By {article.author.name}</span>
-                  <span className="text-[11px] text-secondary">({article.author.role})</span>
-                </div>
-              )}
+              <div className="flex items-center gap-3">
+                {article.author && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-on-surface-variant font-medium">By {article.author.name}</span>
+                    <span className="text-[11px] text-secondary">({article.author.role})</span>
+                  </div>
+                )}
+                <CopyLinkButton />
+              </div>
             </div>
           </header>
 
@@ -160,11 +165,13 @@ export function NewsView({
           {/* Compact Hero Image */}
           {article.image && !imageError && (
             <div className="mb-6 rounded-xl overflow-hidden border border-outline-variant/30 bg-surface-container-lowest shadow-sm">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 alt={article.title}
                 className="w-full h-auto max-h-[320px] object-cover object-center"
                 src={article.image}
+                width={1040}
+                height={320}
+                sizes="(max-width: 1040px) 100vw, 1040px"
                 onError={() => setImageError(true)}
               />
               <div className="px-4 py-2 bg-surface-container-low border-t border-outline-variant/20 text-[11px] text-secondary flex items-center justify-between">

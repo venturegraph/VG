@@ -44,14 +44,14 @@ export const CookieBanner: React.FC = () => {
             remember user preferences (such as theme choice), and deliver startup intelligence. Review our{' '}
             <Link
               href="/cookie-policy"
-              className="text-accent-orange underline hover:opacity-80 font-medium"
+              className="text-accent-orange underline hover:opacity-80 font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-orange rounded-sm"
             >
               Cookie Policy
             </Link>{' '}
             and{' '}
             <Link
               href="/privacy-policy"
-              className="text-accent-orange underline hover:opacity-80 font-medium"
+              className="text-accent-orange underline hover:opacity-80 font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-orange rounded-sm"
             >
               Privacy Policy
             </Link>{' '}
@@ -62,13 +62,13 @@ export const CookieBanner: React.FC = () => {
         <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={handleAcceptNecessary}
-            className="px-4 py-2 border border-white/20 hover:border-white text-gray-300 hover:text-white text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
+            className="px-4 py-2 border border-white/20 hover:border-white text-gray-300 hover:text-white text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-orange"
           >
             Essential Only
           </button>
           <button
             onClick={handleAcceptAll}
-            className="px-5 py-2 bg-accent-orange hover:opacity-90 text-white text-[11px] font-extrabold uppercase tracking-wider transition-opacity cursor-pointer shadow-sm"
+            className="px-5 py-2 bg-accent-orange hover:opacity-90 text-white text-[11px] font-extrabold uppercase tracking-wider transition-opacity cursor-pointer shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-orange"
           >
             Accept All
           </button>

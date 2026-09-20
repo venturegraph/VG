@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { CookieBanner } from '@/components/CookieBanner';
+import { ScrollToTop } from '@/components/ScrollToTop';
+import { FloatingContactButton } from '@/components/FloatingContactButton';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://venturegraph.me';
 
@@ -67,8 +69,16 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-background font-body-base text-body-base text-on-surface antialiased transition-colors duration-200">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-accent-orange focus:text-white focus:text-sm focus:font-bold focus:rounded focus:shadow-lg focus:outline-none"
+        >
+          Skip to content
+        </a>
         {children}
         <CookieBanner />
+        <ScrollToTop />
+        <FloatingContactButton />
       </body>
     </html>
   );

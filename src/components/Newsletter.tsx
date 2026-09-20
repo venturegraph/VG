@@ -53,7 +53,7 @@ export const Newsletter: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-2.5">
                 <input
                   aria-label="Email address"
-                  className="px-4 py-3 bg-white/5 border border-white/20 text-white placeholder:text-gray-500 text-sm focus:outline-none focus:border-accent-orange transition-colors min-w-[260px] flex-1"
+                  className="px-4 py-3 bg-white/5 border border-white/20 text-white placeholder:text-gray-500 text-sm focus:outline-none focus:border-accent-orange focus-visible:ring-2 focus-visible:ring-accent-orange transition-colors min-w-[260px] flex-1"
                   placeholder="Enter your email address"
                   required
                   type="email"
@@ -61,7 +61,7 @@ export const Newsletter: React.FC = () => {
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <button
-                  className="px-6 py-3 bg-accent-orange hover:opacity-90 disabled:opacity-50 text-white text-[11px] font-extrabold uppercase tracking-widest transition-opacity shrink-0 cursor-pointer"
+                  className="px-6 py-3 bg-accent-orange hover:opacity-90 disabled:opacity-50 text-white text-[11px] font-extrabold uppercase tracking-widest transition-opacity shrink-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-orange focus-visible:ring-offset-2 focus-visible:ring-offset-slate-dark"
                   disabled={!consent}
                   type="submit"
                 >
@@ -76,13 +76,13 @@ export const Newsletter: React.FC = () => {
                   required
                   checked={consent}
                   onChange={(e) => setConsent(e.target.checked)}
-                  className="mt-0.5 w-3.5 h-3.5 rounded border border-white/30 bg-white/5 text-accent-orange accent-[#FA654D] cursor-pointer"
+                  className="mt-0.5 w-3.5 h-3.5 rounded border border-white/30 bg-white/5 text-accent-orange accent-[#FA654D] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-orange"
                 />
                 <span className="leading-snug">
                   I agree to receive the weekly email dispatch and accept the{' '}
                   <Link
                     href="/privacy-policy"
-                    className="text-accent-orange underline hover:opacity-80 transition-opacity font-medium"
+                    className="text-accent-orange underline hover:opacity-80 transition-opacity font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-orange rounded-sm"
                   >
                     Privacy Policy
                   </Link>

@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Post } from '@/types';
+import { HeroImage } from './HeroImage';
 
 interface HeroProps {
   story: Post;
@@ -13,15 +14,7 @@ export const Hero: React.FC<HeroProps> = ({ story }) => {
         {/* Background Image & Overlays */}
         <div className="absolute inset-0 z-0">
           {story.image && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              alt={story.title}
-              className="w-full h-full object-cover object-center opacity-45"
-              src={story.image}
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
-            />
+            <HeroImage src={story.image} alt={story.title} />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-inverse-surface via-inverse-surface/80 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-inverse-surface via-inverse-surface/60 to-transparent" />

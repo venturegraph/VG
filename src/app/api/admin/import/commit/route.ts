@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import DOMPurify from 'isomorphic-dompurify';
 import type { ContentType } from '@/types';
 
+export const dynamic = 'force-dynamic';
+
 // ---------------------------------------------------------------------------
 // Request / response shapes
 // ---------------------------------------------------------------------------

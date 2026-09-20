@@ -111,7 +111,7 @@ function CategoryContent({ initialPosts, slug }: CategoryViewProps) {
       />
 
       {/* Main Content Area */}
-      <main className="w-full bg-background min-h-screen flex-1 transition-colors duration-200" style={{ paddingTop: 'var(--header-height, 11rem)' }}>
+      <main id="main-content" className="w-full bg-background min-h-screen flex-1 transition-colors duration-200" style={{ paddingTop: 'var(--header-height, 11rem)' }}>
         {/* Category Header Hero Banner */}
         <div className="w-full border-b border-outline-variant/30 bg-surface-container-low py-10 lg:py-14">
           <div className="max-w-[1280px] mx-auto px-4 lg:px-6">

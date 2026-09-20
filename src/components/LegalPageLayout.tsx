@@ -64,6 +64,7 @@ export const LegalPageLayout: React.FC<LegalPageLayoutProps> = ({
 
       {/* MAIN CONTENT */}
       <main
+        id="main-content"
         className="w-full flex-1"
         style={{ paddingTop: 'var(--header-height, 11rem)' }}
       >

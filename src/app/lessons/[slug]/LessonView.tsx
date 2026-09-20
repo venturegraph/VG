@@ -10,6 +10,7 @@ import {
   TableOfContents,
   HubCaseStudyCard,
 } from '@/components';
+import { CopyLinkButton } from '@/components/CopyLinkButton';
 import {
   NAV_CATEGORIES,
   SECONDARY_NAV_ITEMS,
@@ -81,7 +82,7 @@ export function LessonView({
       />
 
       {/* Main Content Area */}
-      <main className="w-full bg-background min-h-screen flex-1 transition-colors duration-200" style={{ paddingTop: 'var(--header-height, 11rem)' }}>
+      <main id="main-content" className="w-full bg-background min-h-screen flex-1 transition-colors duration-200" style={{ paddingTop: 'var(--header-height, 11rem)' }}>
         <article className="w-full max-w-[1280px] mx-auto px-4 lg:px-6 py-8 lg:py-12">
           {/* Breadcrumbs */}
           <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-xs text-secondary font-label-sm">
@@ -135,8 +136,11 @@ export function LessonView({
                   </div>
                 </div>
 
-                <div className="text-xs text-secondary font-label-sm uppercase tracking-wider">
-                  Verified Archive
+                <div className="flex items-center gap-3">
+                  <div className="text-xs text-secondary font-label-sm uppercase tracking-wider hidden sm:inline">
+                    Verified Archive
+                  </div>
+                  <CopyLinkButton />
                 </div>
               </div>
             )}

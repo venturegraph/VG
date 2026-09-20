@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Header,
   MobileDrawer,
@@ -12,6 +13,7 @@ import {
   LessonsCallout,
   ArticleTableOfContents,
 } from '@/components';
+import { CopyLinkButton } from '@/components/CopyLinkButton';
 import {
   NAV_CATEGORIES,
   SECONDARY_NAV_ITEMS,
@@ -139,7 +141,7 @@ export function ArticleView({
       />
 
       {/* Article Main Content Container */}
-      <main className="w-full bg-background min-h-screen flex-1 transition-colors duration-200" style={{ paddingTop: 'var(--header-height, 11rem)' }}>
+      <main id="main-content" className="w-full bg-background min-h-screen flex-1 transition-colors duration-200" style={{ paddingTop: 'var(--header-height, 11rem)' }}>
         <article className="w-full max-w-[1280px] mx-auto px-4 lg:px-6 py-8 lg:py-12">
           {/* Breadcrumb Navigation */}
           <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-xs text-secondary font-label-sm">
@@ -199,19 +201,7 @@ export function ArticleView({
                 </div>
 
                 <div className="flex items-center gap-2 text-secondary">
-                  <button
-                    aria-label="Share case study"
-                    className="p-1.5 rounded hover:bg-surface-container hover:text-on-surface transition-colors inline-flex items-center gap-1 text-xs font-label-md cursor-pointer"
-                    onClick={() => {
-                      if (typeof window !== 'undefined' && navigator.clipboard) {
-                        navigator.clipboard.writeText(window.location.href);
-                        alert('Link copied to clipboard');
-                      }
-                    }}
-                  >
-                    <span className="material-symbols-outlined text-[16px]">share</span>
-                    <span className="hidden sm:inline">Share</span>
-                  </button>
+                  <CopyLinkButton />
                   <button
                     aria-label="Bookmark story"
                     className="p-1.5 rounded hover:bg-surface-container hover:text-on-surface transition-colors cursor-pointer"
@@ -226,11 +216,13 @@ export function ArticleView({
           {/* Featured Image */}
           {article.image && !imageError && (
             <div className="mb-10 w-full rounded-2xl overflow-hidden border border-outline-variant/30 bg-surface-container-lowest shadow-sm">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 alt={article.title}
                 className="w-full h-auto max-h-[480px] object-cover object-center"
                 src={article.image}
+                width={1280}
+                height={480}
+                sizes="(max-width: 1280px) 100vw, 1280px"
                 onError={() => setImageError(true)}
               />
               <div className="p-3 bg-surface-container-low border-t border-outline-variant/20 text-xs text-secondary italic">

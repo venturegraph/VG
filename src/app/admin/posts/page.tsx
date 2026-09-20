@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { formatStatus, formatContentType, formatRole } from '@/lib/formatStatus';
 import { PostStatus, UserRole } from '@/types';
+import { ConfirmModal } from '@/components/admin/ConfirmModal';
 
 interface AdminPostItem {
   id: string;
@@ -52,6 +53,8 @@ function AdminPostsContent() {
   // Inline action state (e.g. Approve & Publish loading ID)
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [actionSuccessMessage, setActionSuccessMessage] = useState<string | null>(null);
+  const [postToDelete, setPostToDelete] = useState<AdminPostItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Sync theme
   useEffect(() => {
@@ -313,18 +316,19 @@ function AdminPostsContent() {
     return isOwnPost && post.status !== 'published';
   };
 
-  // Action: Soft delete post (sets deleted_at = now())
-  const handleDeletePost = async (post: AdminPostItem) => {
+  // Action: Open custom deletion confirmation modal
+  const handleDeletePost = (post: AdminPostItem) => {
     if (!canDeletePost(post)) {
       alert('You do not have permission to delete this dispatch.');
       return;
     }
+    setPostToDelete(post);
+  };
 
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${post.title}"?\n\nThis will soft-delete the dispatch and remove it from public and editorial listings.`
-    );
-    if (!confirmed) return;
-
+  const handleConfirmDelete = async () => {
+    if (!postToDelete) return;
+    const post = postToDelete;
+    setIsDeleting(true);
     setActionLoadingId(post.id);
     setActionSuccessMessage(null);
 
@@ -360,10 +364,12 @@ function AdminPostsContent() {
       // Remove from local list
       setDbPosts((prev) => prev.filter((p) => p.id !== post.id));
       setActionSuccessMessage(`Post "${post.title}" has been deleted.`);
+      setPostToDelete(null);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to delete post.';
       alert(`Delete error: ${msg}`);
     } finally {
+      setIsDeleting(false);
       setActionLoadingId(null);
     }
   };
@@ -1081,6 +1087,19 @@ function AdminPostsContent() {
       <footer className="w-full max-w-[1400px] mx-auto px-4 lg:px-8 py-6 text-center text-xs text-secondary border-t border-outline-variant/20">
         Venture Graph CMS — Role-based access control active ({formatRole(userRole)} Session).
       </footer>
+
+      {/* Deletion Confirmation Modal */}
+      <ConfirmModal
+        isOpen={postToDelete !== null}
+        title="Delete Post Dispatch"
+        description={`Are you sure you want to delete "${postToDelete?.title}"?\n\nThis will soft-delete the dispatch and remove it from public and editorial listings.`}
+        confirmText="Delete Dispatch"
+        cancelText="Cancel"
+        isDangerous={true}
+        isLoading={isDeleting}
+        onCancel={() => setPostToDelete(null)}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }

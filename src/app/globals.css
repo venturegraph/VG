@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 :root {
+  --header-height: 13rem; /* ~208px — approximate rendered header; ResizeObserver refines at runtime */
   --color-primary-fixed: 255 218 212;
   --color-on-primary-fixed: 64 2 0;
   --color-tertiary: 0 106 100;
@@ -264,3 +265,77 @@
   background-color: rgb(var(--color-surface-container-low) / 0.8) !important;
   border: 1px solid rgb(var(--color-outline-variant) / 0.4) !important;
 }
+
+/* ── PRINT STYLESHEET ──────────────────────────────────────────────────────── */
+@media print {
+  /* Hide navigation, header, footer, tickers, drawers, cookies, buttons, and chrome */
+  header,
+  footer,
+  aside,
+  #mobile-drawer,
+  #mobile-drawer-backdrop,
+  #header-search-bar,
+  .no-print,
+  button,
+  form,
+  nav[aria-label="Breadcrumb"],
+  nav[aria-label="Primary Navigation"],
+  a[href="#main-content"] {
+    display: none !important;
+  }
+
+  /* Reset document flow and colors for pure ink printing */
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+    line-height: 1.6 !important;
+  }
+
+  main,
+  #main-content {
+    padding-top: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  article {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Prevent awkward page breaks */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+    color: #000000 !important;
+  }
+
+  blockquote,
+  table,
+  pre,
+  img,
+  figure {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  p, span, li, td, th {
+    color: #111827 !important;
+  }
+
+  a {
+    color: #000000 !important;
+    text-decoration: underline !important;
+  }
+
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+}
+

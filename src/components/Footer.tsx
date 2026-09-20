@@ -117,19 +117,19 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-2.5 text-xs font-semibold text-white uppercase tracking-wider">
               <li>
-                <a href="#" className="hover:text-accent-orange transition-colors">
-                  About Us
-                </a>
+                <Link href="/faq" className="hover:text-accent-orange transition-colors">
+                  FAQ
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-accent-orange transition-colors">
+                <Link href="/contact" className="hover:text-accent-orange transition-colors">
                   Contact Us
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-accent-orange transition-colors">
-                  Editorial Guidelines
-                </a>
+                <Link href="/privacy-policy" className="hover:text-accent-orange transition-colors">
+                  Editorial Standards
+                </Link>
               </li>
             </ul>
           </div>
