@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { ContentType, PostStatus } from '@/types';
-import { slugify } from '@/lib/seo';
+import { slugify, resolveSeoTitle } from '@/lib/seo';
 import { PARENT_TAXONOMY } from '@/lib/taxonomy';
 import { formatStatus } from '@/lib/formatStatus';
 import DOMPurify from 'isomorphic-dompurify';
@@ -61,7 +61,9 @@ export const PostForm: React.FC<PostFormProps> = ({
   );
   const [title, setTitle] = useState(initialPost?.title || '');
   const [seoTitle, setSeoTitle] = useState(
-    initialPost?.seo_title || '%title% %sep% %sitename%'
+    initialPost?.seo_title && initialPost.seo_title !== '%title% %sep% %sitename%'
+      ? initialPost.seo_title
+      : ''
   );
   const [slug, setSlug] = useState(initialPost?.slug || '');
   const [isSlugTaken, setIsSlugTaken] = useState(false);
@@ -130,7 +132,10 @@ export const PostForm: React.FC<PostFormProps> = ({
   const [seoAnalysis, setSeoAnalysis] = useState<RankMathAnalysisResult>(() =>
     analyzeRankMathSEO({
       title: initialPost?.title || '',
-      seoTitle: initialPost?.seo_title || '%title% %sep% %sitename%',
+      seoTitle:
+        initialPost?.seo_title && initialPost.seo_title !== '%title% %sep% %sitename%'
+          ? initialPost.seo_title
+          : '',
       slug: initialPost?.slug || '',
       metaDescription: initialPost?.meta_description || '',
       focusKeyword: initialPost?.focus_keyword || '',
@@ -357,9 +362,14 @@ export const PostForm: React.FC<PostFormProps> = ({
 
       const now = new Date().toISOString();
 
+      const cleanSeoTitle =
+        seoTitle.trim() && seoTitle.trim() !== '%title% %sep% %sitename%'
+          ? resolveSeoTitle(seoTitle, title)
+          : null;
+
       const postPayload: Record<string, any> = {
         title: title.trim(),
-        seo_title: seoTitle.trim() || null,
+        seo_title: cleanSeoTitle && cleanSeoTitle !== title.trim() ? cleanSeoTitle : null,
         slug: cleanSlug,
         content_type: contentType,
         content: sanitizedContent,
@@ -528,7 +538,7 @@ export const PostForm: React.FC<PostFormProps> = ({
                 onClick={() => {
                   setFormSuccess(null);
                   setTitle('');
-                  setSeoTitle('%title% %sep% %sitename%');
+                  setSeoTitle('');
                   setSlug('');
                   setContent('');
                   setMetaDescription('');
@@ -599,6 +609,7 @@ export const PostForm: React.FC<PostFormProps> = ({
               </label>
               <input
                 id="post-title-input"
+                name="title"
                 type="text"
                 required
                 value={title}

@@ -169,7 +169,12 @@ export function SearchView() {
             {/* Search Input Bar */}
             <form onSubmit={handleSubmit} className="flex gap-2 max-w-2xl">
               <div className="relative flex-1">
+                <label htmlFor="search-page-input" className="sr-only">
+                  Search query
+                </label>
                 <input
+                  id="search-page-input"
+                  name="q"
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}

@@ -62,6 +62,7 @@ export const CaseStudyFields: React.FC<CaseStudyFieldsProps> = ({
           </label>
           <input
             id="total-raised-input"
+            name="total_raised"
             type="text"
             required
             value={totalRaised}
@@ -84,6 +85,7 @@ export const CaseStudyFields: React.FC<CaseStudyFieldsProps> = ({
           </label>
           <input
             id="founded-year-input"
+            name="founded_year"
             type="number"
             min="1980"
             max="2030"
@@ -108,6 +110,7 @@ export const CaseStudyFields: React.FC<CaseStudyFieldsProps> = ({
           </label>
           <input
             id="shutdown-year-input"
+            name="shutdown_year"
             type="number"
             min="1980"
             max="2030"
@@ -132,6 +135,7 @@ export const CaseStudyFields: React.FC<CaseStudyFieldsProps> = ({
           </label>
           <input
             id="hq-country-input"
+            name="hq_country"
             type="text"
             required
             value={hqCountry}
@@ -155,6 +159,7 @@ export const CaseStudyFields: React.FC<CaseStudyFieldsProps> = ({
         </label>
         <textarea
           id="failure-reason-input"
+          name="failure_reason"
           rows={2}
           required
           value={failureReason}

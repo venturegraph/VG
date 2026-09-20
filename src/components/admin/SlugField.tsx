@@ -83,6 +83,7 @@ export const SlugField: React.FC<SlugFieldProps> = ({
         </div>
         <input
           id="slug-input"
+          name="slug"
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}

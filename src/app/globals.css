@@ -339,3 +339,17 @@
   }
 }
 
+/* ==========================================================================
+   Cumulative Layout Shift (CLS) Prevention for Responsive & Lazy Images
+   ========================================================================== */
+.article-rich-content img,
+.article-html-content img,
+.prose img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 0.75rem;
+}
+
+

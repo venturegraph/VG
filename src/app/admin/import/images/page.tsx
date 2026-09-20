@@ -233,6 +233,8 @@ function Thumb({ url }: { url: string | null }) {
       <img
         src={url}
         alt=""
+        width={56}
+        height={40}
         className="w-full h-full object-cover"
         loading="lazy"
         onError={() => setBroken(true)}

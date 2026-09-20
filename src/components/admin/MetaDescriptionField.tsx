@@ -62,6 +62,7 @@ export const MetaDescriptionField: React.FC<MetaDescriptionFieldProps> = ({
       <div className="relative">
         <textarea
           id="meta-description-input"
+          name="meta_description"
           rows={3}
           value={value}
           onChange={(e) => onChange(e.target.value)}

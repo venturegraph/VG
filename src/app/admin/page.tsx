@@ -200,6 +200,8 @@ function AdminLoginForm() {
                 </span>
                 <input
                   id="admin-email"
+                  name="email"
+                  autoComplete="email"
                   type="email"
                   required
                   value={email}
@@ -225,6 +227,8 @@ function AdminLoginForm() {
                 </span>
                 <input
                   id="admin-password"
+                  name="password"
+                  autoComplete="current-password"
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}

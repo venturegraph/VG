@@ -13,6 +13,8 @@ import {
   CaseStudyFunnelCard,
 } from '@/components';
 import { CopyLinkButton } from '@/components/CopyLinkButton';
+import { BookmarkButton } from '@/components/BookmarkButton';
+import { CommentSection } from '@/components/comments/CommentSection';
 import {
   NAV_CATEGORIES,
   SECONDARY_NAV_ITEMS,
@@ -154,7 +156,10 @@ export function NewsView({
                     <span className="text-[11px] text-secondary">({article.author.role})</span>
                   </div>
                 )}
-                <CopyLinkButton />
+                <div className="flex items-center gap-1.5">
+                  <CopyLinkButton />
+                  <BookmarkButton postId={article.id} postTitle={article.title} slug={article.slug} />
+                </div>
               </div>
             </div>
           </header>
@@ -165,15 +170,19 @@ export function NewsView({
           {/* Compact Hero Image */}
           {article.image && !imageError && (
             <div className="mb-6 rounded-xl overflow-hidden border border-outline-variant/30 bg-surface-container-lowest shadow-sm">
-              <Image
-                alt={article.title}
-                className="w-full h-auto max-h-[320px] object-cover object-center"
-                src={article.image}
-                width={1040}
-                height={320}
-                sizes="(max-width: 1040px) 100vw, 1040px"
-                onError={() => setImageError(true)}
-              />
+              <div className="relative w-full max-h-[320px] overflow-hidden">
+                <Image
+                  alt={article.title}
+                  className="w-full h-auto object-cover object-center"
+                  src={article.image}
+                  width={1040}
+                  height={320}
+                  priority
+                  sizes="(max-width: 1040px) 100vw, 1040px"
+                  style={{ height: 'auto', aspectRatio: '13 / 4' }}
+                  onError={() => setImageError(true)}
+                />
+              </div>
               <div className="px-4 py-2 bg-surface-container-low border-t border-outline-variant/20 text-[11px] text-secondary flex items-center justify-between">
                 <span>Infrastructure &amp; Capital movement intelligence</span>
                 <span>Venture Graph Wire</span>
@@ -196,7 +205,7 @@ export function NewsView({
 
             {article.htmlContent && article.htmlContent.includes('<') ? (
               <div
-                className="article-html-content font-body-base text-base text-on-surface-variant leading-relaxed max-w-3xl space-y-4"
+                className="article-html-content prose dark:prose-invert font-body-base text-base text-on-surface leading-relaxed max-w-3xl"
                 dangerouslySetInnerHTML={{
                   __html: DOMPurify.sanitize(article.htmlContent, {
                     ADD_TAGS: ['iframe'],
@@ -248,6 +257,9 @@ export function NewsView({
             <div className="pt-4 border-t border-outline-variant/20 text-xs text-secondary leading-relaxed">
               <span className="font-semibold text-on-surface">Verification:</span> Figures reported reflect audited filings, direct stakeholder confirmations, or company disclosures published on the date indicated above.
             </div>
+
+            {/* Reader Comments */}
+            <CommentSection postId={article.id} postTitle={article.title} />
           </div>
         </article>
 

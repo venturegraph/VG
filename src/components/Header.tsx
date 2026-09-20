@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { NAV_CATEGORIES, SECONDARY_NAV_ITEMS } from '@/lib/taxonomy';
 import { BrandedLoader } from '@/components/BrandedLoader';
+import { AccountDropdown } from '@/components/auth/AccountDropdown';
 
 interface HeaderProps {
   onOpenMobileMenu: () => void;
@@ -304,18 +305,8 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
-            {/* Account / Admin */}
-            <Link
-              href="/admin"
-              aria-label="Account / Admin"
-              className="p-1 hover:text-accent-orange transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-orange rounded"
-              title="Admin panel"
-            >
-              <svg className="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-            </Link>
+            {/* Account / Reader Menu */}
+            <AccountDropdown />
           </div>
         </div>
       </div>
@@ -359,9 +350,13 @@ export const Header: React.FC<HeaderProps> = ({
               <circle cx="11" cy="11" r="7" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
+            <label htmlFor="header-search-input" className="sr-only">
+              Search site
+            </label>
             <input
               ref={searchInputRef}
               id="header-search-input"
+              name="q"
               type="text"
               autoComplete="off"
               className="w-full bg-transparent border-none text-slate-dark dark:text-white placeholder:text-gray-400 text-sm py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-orange rounded px-2"

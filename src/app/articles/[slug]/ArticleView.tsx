@@ -14,6 +14,8 @@ import {
   ArticleTableOfContents,
 } from '@/components';
 import { CopyLinkButton } from '@/components/CopyLinkButton';
+import { BookmarkButton } from '@/components/BookmarkButton';
+import { CommentSection } from '@/components/comments/CommentSection';
 import {
   NAV_CATEGORIES,
   SECONDARY_NAV_ITEMS,
@@ -94,6 +96,18 @@ export function ArticleView({
           : `${newAttrs} class="scroll-mt-36"`;
 
         return `<${tag}${finalAttrs}>${innerText}</${tag}>`;
+      });
+
+      // Ensure all body images have explicit aspect-ratio and lazy loading to prevent CLS
+      html = html.replace(/<img\s+([^>]*?)>/gi, (_match, attrs) => {
+        let updated = attrs;
+        if (!/loading=/i.test(updated)) {
+          updated += ' loading="lazy"';
+        }
+        if (!/aspect-ratio/i.test(updated) && !/width=/i.test(updated)) {
+          updated += ' style="aspect-ratio: 16/9; width: 100%; height: auto;"';
+        }
+        return `<img ${updated}>`;
       });
 
       return { processedHtml: html, headings: list };
@@ -202,12 +216,7 @@ export function ArticleView({
 
                 <div className="flex items-center gap-2 text-secondary">
                   <CopyLinkButton />
-                  <button
-                    aria-label="Bookmark story"
-                    className="p-1.5 rounded hover:bg-surface-container hover:text-on-surface transition-colors cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">bookmark_border</span>
-                  </button>
+                  <BookmarkButton postId={article.id} postTitle={article.title} slug={article.slug} />
                 </div>
               </div>
             )}
@@ -216,15 +225,19 @@ export function ArticleView({
           {/* Featured Image */}
           {article.image && !imageError && (
             <div className="mb-10 w-full rounded-2xl overflow-hidden border border-outline-variant/30 bg-surface-container-lowest shadow-sm">
-              <Image
-                alt={article.title}
-                className="w-full h-auto max-h-[480px] object-cover object-center"
-                src={article.image}
-                width={1280}
-                height={480}
-                sizes="(max-width: 1280px) 100vw, 1280px"
-                onError={() => setImageError(true)}
-              />
+              <div className="relative w-full max-h-[480px] overflow-hidden">
+                <Image
+                  alt={article.title}
+                  className="w-full h-auto object-cover object-center"
+                  src={article.image}
+                  width={1280}
+                  height={480}
+                  priority
+                  sizes="(max-width: 1280px) 100vw, 1280px"
+                  style={{ height: 'auto', aspectRatio: '8 / 3' }}
+                  onError={() => setImageError(true)}
+                />
+              </div>
               <div className="p-3 bg-surface-container-low border-t border-outline-variant/20 text-xs text-secondary italic">
                 Deconstructed startup wreckage: The structural autopsy of {article.title.split(':')[0]}.
               </div>
@@ -251,7 +264,7 @@ export function ArticleView({
                   className="article-rich-content prose dark:prose-invert max-w-none text-on-surface leading-relaxed"
                   dangerouslySetInnerHTML={{
                     __html: DOMPurify.sanitize(processedHtml, {
-                      ADD_ATTR: ['target', 'rel', 'id', 'class'],
+                      ADD_ATTR: ['target', 'rel', 'id', 'class', 'loading', 'style', 'width', 'height'],
                     }),
                   }}
                 />
@@ -325,6 +338,9 @@ export function ArticleView({
               <div className="mt-8 pt-6 border-t border-outline-variant/20 text-xs text-secondary leading-relaxed bg-surface-container-low p-4 rounded-xl">
                 <span className="font-bold text-on-surface">Editorial Note:</span> This post-mortem is compiled from public SEC regulatory filings, Delaware bankruptcy proceedings, verified investor disclosures, and former executive interviews. Figures reflect all available capital tranches at time of liquidation.
               </div>
+
+              {/* Reader Comments */}
+              <CommentSection postId={article.id} postTitle={article.title} />
             </div>
 
             {/* Right Column: Desktop Sticky "At a glance" Stat Box */}

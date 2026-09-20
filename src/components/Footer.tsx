@@ -160,6 +160,11 @@ export const Footer: React.FC = () => {
                   Terms of Service
                 </Link>
               </li>
+              <li>
+                <Link href="/refund-policy" className="hover:text-accent-orange transition-colors">
+                  Refund Policy
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

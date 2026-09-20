@@ -11,6 +11,8 @@ import {
   HubCaseStudyCard,
 } from '@/components';
 import { CopyLinkButton } from '@/components/CopyLinkButton';
+import { BookmarkButton } from '@/components/BookmarkButton';
+import { CommentSection } from '@/components/comments/CommentSection';
 import {
   NAV_CATEGORIES,
   SECONDARY_NAV_ITEMS,
@@ -136,11 +138,12 @@ export function LessonView({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="text-xs text-secondary font-label-sm uppercase tracking-wider hidden sm:inline">
+                <div className="flex items-center gap-1.5">
+                  <div className="text-xs text-secondary font-label-sm uppercase tracking-wider hidden sm:inline mr-1">
                     Verified Archive
                   </div>
                   <CopyLinkButton />
+                  <BookmarkButton postId={article.id} postTitle={article.title} slug={article.slug} />
                 </div>
               </div>
             )}
@@ -174,12 +177,22 @@ export function LessonView({
               {/* Real HTML Article Content from Supabase */}
               {article.htmlContent && article.htmlContent.includes('<') ? (
                 <div
-                  className="article-html-content font-body-base text-base text-on-surface-variant leading-relaxed space-y-4 my-4"
+                  className="article-html-content prose dark:prose-invert font-body-base text-base text-on-surface leading-relaxed max-w-none my-4"
                   dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(article.htmlContent, {
-                      ADD_TAGS: ['iframe'],
-                      ADD_ATTR: ['target', 'rel', 'allowfullscreen', 'frameborder', 'data-type'],
-                    }),
+                    __html: DOMPurify.sanitize(
+                      article.htmlContent.replace(/<img\s+([^>]*?)>/gi, (_match, attrs) => {
+                        let updated = attrs;
+                        if (!/loading=/i.test(updated)) updated += ' loading="lazy"';
+                        if (!/aspect-ratio/i.test(updated) && !/width=/i.test(updated)) {
+                          updated += ' style="aspect-ratio: 16/9; width: 100%; height: auto;"';
+                        }
+                        return `<img ${updated}>`;
+                      }),
+                      {
+                        ADD_TAGS: ['iframe'],
+                        ADD_ATTR: ['target', 'rel', 'allowfullscreen', 'frameborder', 'data-type', 'loading', 'style', 'width', 'height'],
+                      }
+                    ),
                   }}
                 />
               ) : null}
@@ -249,6 +262,9 @@ export function LessonView({
                   <p className="text-on-surface-variant leading-relaxed">{article.conclusion}</p>
                 </div>
               )}
+
+              {/* Reader Comments */}
+              <CommentSection postId={article.id} postTitle={article.title} />
             </div>
 
             {/* Right Column: Desktop Sticky Table of Contents */}

@@ -269,6 +269,8 @@ export function ContactView() {
                       </label>
                       <input
                         id="contact-name"
+                        name="name"
+                        autoComplete="name"
                         type="text"
                         required
                         value={name}
@@ -285,6 +287,8 @@ export function ContactView() {
                       </label>
                       <input
                         id="contact-email"
+                        name="email"
+                        autoComplete="email"
                         type="email"
                         required
                         value={email}
@@ -303,6 +307,7 @@ export function ContactView() {
                       </label>
                       <select
                         id="contact-category"
+                        name="category"
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
                         className="w-full px-3.5 py-2.5 bg-surface-container-lowest border border-outline-variant/50 rounded-lg text-xs text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-orange cursor-pointer"
@@ -322,6 +327,8 @@ export function ContactView() {
                       </label>
                       <input
                         id="contact-company"
+                        name="company"
+                        autoComplete="organization"
                         type="text"
                         value={company}
                         onChange={(e) => setCompany(e.target.value)}
@@ -338,6 +345,7 @@ export function ContactView() {
                     </label>
                     <textarea
                       id="contact-message"
+                      name="message"
                       rows={5}
                       required
                       value={message}
@@ -349,8 +357,10 @@ export function ContactView() {
 
                   {/* Privacy Consent */}
                   <div className="pt-2">
-                    <label className="flex items-start gap-2.5 cursor-pointer text-xs text-secondary select-none">
+                    <label htmlFor="contact-consent" className="flex items-start gap-2.5 cursor-pointer text-xs text-secondary select-none">
                       <input
+                        id="contact-consent"
+                        name="consent"
                         type="checkbox"
                         required
                         checked={consent}

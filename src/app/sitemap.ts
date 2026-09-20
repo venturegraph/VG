@@ -17,8 +17,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const legalHrefs = [
     '/privacy-policy',
     '/terms-of-service',
+    '/refund-policy',
     '/cookie-policy',
     '/disclaimer',
+    '/faq',
+    '/contact',
   ];
 
   const uniquePaths = Array.from(new Set(['/', ...taxonomyHrefs, ...legalHrefs]));

@@ -3,7 +3,7 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { LessonView, ExtendedHubArticle } from './LessonView';
 import { HubArticle } from '@/types';
-import { stripHtml } from '@/lib/seo';
+import { stripHtml, resolveSeoTitle } from '@/lib/seo';
 import { getCanonicalPostPath, isLesson } from '@/lib/routes';
 
 interface PageProps {
@@ -124,7 +124,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const post = result.raw;
-  const title = post.seo_title || post.title;
+  const title = resolveSeoTitle(post.seo_title, post.title);
   const description =
     post.meta_description ||
     (post.content ? stripHtml(post.content).slice(0, 155) + '...' : post.title);

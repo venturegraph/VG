@@ -83,6 +83,8 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
               src="https://lh3.googleusercontent.com/aida/AEtjO1XP8QDymFpqagarXnm65HMbh8X8tFtZWFtrczWEyA1vqfSkrN3ZDVdZx292_TzSYRuaRWHjlCGUTBfeaQryI-xSLhJjW03-FtCRLHAZGUA9S8H0A74T2_koIRN2bSjeJ2R1AIAwkz_WH2HJw2UziWtf01RYu_HRc_bOPE1CBjY8x9GT013sf2A60ij3t73BNec66eZV8XzN5V0AZbawYcmcFP6vavI_jJ-I9w9nURywyEFiUvaBQdi5WZlF"
               width={120}
               height={28}
+              priority
+              style={{ width: 'auto', height: '28px', aspectRatio: '120 / 28' }}
               unoptimized
             />
           </a>
@@ -112,7 +114,12 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
             <span className="material-symbols-outlined absolute left-3 text-secondary text-[18px] pointer-events-none">
               search
             </span>
+            <label htmlFor="drawer-search-input" className="sr-only">
+              Search archive
+            </label>
             <input
+              id="drawer-search-input"
+              name="q"
               className="w-full pl-9 pr-3 py-2 text-xs bg-surface-container-lowest rounded-lg border border-outline-variant/40 placeholder:text-on-surface-variant/60 focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary text-on-surface"
               placeholder="Search startups, rounds... (Press Enter)"
               type="text"

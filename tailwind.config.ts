@@ -80,9 +80,120 @@ const config: Config = {
         'label-sm': ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
         'stat-lg': ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: 'none',
+            color: 'inherit',
+            a: {
+              color: '#FA654D',
+              textDecoration: 'underline',
+              fontWeight: '500',
+              '&:hover': {
+                opacity: '0.85',
+              },
+            },
+            h1: {
+              fontFamily: 'Newsreader, Georgia, serif',
+              color: 'inherit',
+            },
+            h2: {
+              fontFamily: 'Newsreader, Georgia, serif',
+              fontWeight: '700',
+              color: 'inherit',
+              marginTop: '2.5rem',
+              marginBottom: '1rem',
+            },
+            h3: {
+              fontFamily: 'Newsreader, Georgia, serif',
+              fontWeight: '600',
+              color: 'inherit',
+              marginTop: '2rem',
+              marginBottom: '0.75rem',
+            },
+            h4: {
+              fontFamily: 'Newsreader, Georgia, serif',
+              fontWeight: '600',
+              color: 'inherit',
+              marginTop: '1.5rem',
+              marginBottom: '0.5rem',
+            },
+            p: {
+              marginTop: '0',
+              marginBottom: '1.25rem',
+              lineHeight: '1.75',
+            },
+            blockquote: {
+              borderLeftColor: '#FA654D',
+              borderLeftWidth: '4px',
+              fontStyle: 'italic',
+              color: 'inherit',
+              paddingLeft: '1.25rem',
+              paddingTop: '0.5rem',
+              paddingBottom: '0.5rem',
+              marginTop: '1.5rem',
+              marginBottom: '1.5rem',
+            },
+            ul: {
+              listStyleType: 'disc',
+              paddingLeft: '1.5rem',
+              marginTop: '1rem',
+              marginBottom: '1.25rem',
+            },
+            ol: {
+              listStyleType: 'decimal',
+              paddingLeft: '1.5rem',
+              marginTop: '1rem',
+              marginBottom: '1.25rem',
+            },
+            li: {
+              marginTop: '0.375rem',
+              marginBottom: '0.375rem',
+              lineHeight: '1.65',
+            },
+            strong: {
+              fontWeight: '700',
+              color: 'inherit',
+            },
+            figure: {
+              marginTop: '2rem',
+              marginBottom: '2rem',
+            },
+            img: {
+              borderRadius: '0.75rem',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+            },
+            figcaption: {
+              textAlign: 'center',
+              fontSize: '0.8125rem',
+              color: 'rgb(var(--color-secondary))',
+              marginTop: '0.5rem',
+            },
+            table: {
+              width: '100%',
+              marginTop: '1.5rem',
+              marginBottom: '1.5rem',
+              borderCollapse: 'collapse',
+            },
+            th: {
+              borderBottomWidth: '2px',
+              borderBottomColor: 'rgb(var(--color-outline-variant) / 0.4)',
+              padding: '0.75rem',
+              fontWeight: '700',
+              textAlign: 'left',
+            },
+            td: {
+              borderBottomWidth: '1px',
+              borderBottomColor: 'rgb(var(--color-outline-variant) / 0.2)',
+              padding: '0.75rem',
+            },
+          },
+        },
+      },
     },
   },
-  plugins: [],
+  plugins: [require('@tailwindcss/typography')],
 };
 
 export default config;

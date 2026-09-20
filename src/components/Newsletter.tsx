@@ -62,7 +62,13 @@ export const Newsletter: React.FC = () => {
               onSubmit={handleSubmit}
             >
               <div className="flex flex-col sm:flex-row gap-2.5">
+                <label htmlFor="newsletter-email" className="sr-only">
+                  Email address
+                </label>
                 <input
+                  id="newsletter-email"
+                  name="email"
+                  autoComplete="email"
                   aria-label="Email address"
                   className="px-4 py-3 bg-white/5 border border-white/20 text-white placeholder:text-gray-500 text-sm focus:outline-none focus:border-accent-orange focus-visible:ring-2 focus-visible:ring-accent-orange transition-colors min-w-[260px] flex-1"
                   placeholder="Enter your email address"
@@ -81,8 +87,10 @@ export const Newsletter: React.FC = () => {
               </div>
 
               {/* GDPR / CAN-SPAM Consent Checkbox */}
-              <label className="flex items-start gap-2.5 mt-3 cursor-pointer text-xs text-gray-400 select-none">
+              <label htmlFor="newsletter-consent" className="flex items-start gap-2.5 mt-3 cursor-pointer text-xs text-gray-400 select-none">
                 <input
+                  id="newsletter-consent"
+                  name="consent"
                   type="checkbox"
                   required
                   checked={consent}

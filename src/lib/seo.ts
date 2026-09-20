@@ -166,3 +166,56 @@ export function slugify(text: string): string {
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '');
 }
+
+/**
+ * Resolves SEO title by expanding or removing WordPress/RankMath template tokens (%title%, %sep%, %sitename%)
+ * and stripping duplicate site suffixes so Next.js's layout template doesn't double-suffix.
+ */
+export function resolveSeoTitle(
+  seoTitle?: string | null,
+  fallbackTitle: string = ''
+): string {
+  const baseTitle = (fallbackTitle || '').trim();
+  if (!seoTitle || !seoTitle.trim()) {
+    return baseTitle;
+  }
+
+  const trimmed = seoTitle.trim();
+
+  // If it's literally the default RankMath template string:
+  if (
+    trimmed === '%title% %sep% %sitename%' ||
+    trimmed === '%title% - %sitename%' ||
+    trimmed === '%title% | %sitename%' ||
+    trimmed === '%title%'
+  ) {
+    return baseTitle;
+  }
+
+  let cleaned = trimmed;
+
+  // If the string contains WordPress/RankMath placeholder tags like %title%, %sep%, %sitename%:
+  if (/%(title|sep|sitename|page|category|excerpt)%/i.test(cleaned)) {
+    cleaned = cleaned
+      .replace(/%title%/gi, () => baseTitle)
+      .replace(/%sep%/gi, '-')
+      .replace(/%sitename%/gi, 'Venture Graph')
+      .replace(/%page%/gi, '')
+      .replace(/%category%/gi, '')
+      .replace(/%excerpt%/gi, '')
+      .trim();
+  }
+
+  // Strip trailing separator and site name if present (e.g. "Title - Venture Graph" or "Title | Venture Graph")
+  // because Next.js root layout template (`%s | Venture Graph`) automatically appends "| Venture Graph".
+  cleaned = cleaned
+    .replace(/\s*[-–—|]\s*Venture\s*Graph\s*$/i, '')
+    .replace(/\s*[-–—|]\s*$/i, '')
+    .trim();
+
+  if (!cleaned || cleaned === '-' || cleaned === '|') {
+    return baseTitle;
+  }
+
+  return cleaned;
+}

@@ -156,7 +156,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const metadata = getCategoryMetadata(params.slug);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://venturegraph.me';
   const canonicalUrl = `${siteUrl}/category/${params.slug}`;
-  const title = `${metadata.title} | Venture Graph`;
+  const title = metadata.title;
+  const fullTitle = `${metadata.title} | Venture Graph`;
   const description = metadata.description;
 
   return {
@@ -168,7 +169,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       type: 'website',
       url: canonicalUrl,
-      title,
+      title: fullTitle,
       description,
       images: [
         {
@@ -179,7 +180,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: fullTitle,
       description,
       images: [`${siteUrl}/icon.png`],
     },
