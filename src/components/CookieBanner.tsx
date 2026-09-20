@@ -16,11 +16,13 @@ export const CookieBanner: React.FC = () => {
 
   const handleAcceptAll = () => {
     localStorage.setItem('vg_cookie_consent', 'accepted');
+    window.dispatchEvent(new Event('vg_cookie_consent_updated'));
     setIsVisible(false);
   };
 
   const handleAcceptNecessary = () => {
     localStorage.setItem('vg_cookie_consent', 'essential');
+    window.dispatchEvent(new Event('vg_cookie_consent_updated'));
     setIsVisible(false);
   };
 

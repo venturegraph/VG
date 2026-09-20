@@ -7,6 +7,7 @@ import { MobileDrawer } from '@/components/MobileDrawer';
 import { Footer } from '@/components/Footer';
 import { NAV_CATEGORIES, SECONDARY_NAV_ITEMS } from '@/lib/taxonomy';
 import { createClient } from '@/lib/supabase/client';
+import { trackEvent } from '@/lib/analytics';
 
 export function ContactView() {
   const [name, setName] = useState('');
@@ -46,10 +47,18 @@ export function ContactView() {
     e.preventDefault();
     if (!consent) {
       setErrorMsg('Please agree to the privacy policy before submitting.');
+      trackEvent('form_submit_error', {
+        form_name: 'contact_form',
+        error_reason: 'consent_required',
+      });
       return;
     }
     if (message.trim().length < 15) {
       setErrorMsg('Please enter a message of at least 15 characters.');
+      trackEvent('form_submit_error', {
+        form_name: 'contact_form',
+        error_reason: 'message_too_short',
+      });
       return;
     }
 
@@ -85,10 +94,20 @@ export function ContactView() {
 
       setReferenceId(ref);
       setSubmitted(true);
+      trackEvent('form_submit_success', {
+        form_name: 'contact_form',
+        category,
+        has_company: Boolean(company.trim()),
+      });
     } catch {
       // Fallback
       setReferenceId(ref);
       setSubmitted(true);
+      trackEvent('form_submit_success', {
+        form_name: 'contact_form',
+        category,
+        fallback_mode: true,
+      });
     } finally {
       setIsSubmitting(false);
     }

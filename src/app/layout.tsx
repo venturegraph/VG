@@ -3,6 +3,7 @@ import './globals.css';
 import { CookieBanner } from '@/components/CookieBanner';
 import { ScrollToTop } from '@/components/ScrollToTop';
 import { FloatingContactButton } from '@/components/FloatingContactButton';
+import { GoogleAnalyticsWrapper } from '@/components/GoogleAnalyticsWrapper';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://venturegraph.me';
 
@@ -79,6 +80,7 @@ export default function RootLayout({
         <CookieBanner />
         <ScrollToTop />
         <FloatingContactButton />
+        <GoogleAnalyticsWrapper gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
       </body>
     </html>
   );

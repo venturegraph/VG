@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { trackEvent } from '@/lib/analytics';
 
 export const Newsletter: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -13,6 +14,16 @@ export const Newsletter: React.FC = () => {
     if (email && consent) {
       setIsSubscribed(true);
       setEmail('');
+      trackEvent('form_submit_success', {
+        form_name: 'newsletter',
+        form_id: 'newsletter-signup',
+      });
+    } else {
+      trackEvent('form_submit_error', {
+        form_name: 'newsletter',
+        form_id: 'newsletter-signup',
+        error_reason: !consent ? 'consent_unchecked' : 'missing_email',
+      });
     }
   };
 

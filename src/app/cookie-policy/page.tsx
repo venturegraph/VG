@@ -77,6 +77,12 @@ export default function CookiePolicyPage() {
                 <td className="p-3 font-semibold text-accent-orange">Essential (Admin Only)</td>
                 <td className="p-3">Maintains administrative editor authentication sessions.</td>
               </tr>
+              <tr>
+                <td className="p-3 font-mono text-on-surface font-semibold">_ga, _ga_*</td>
+                <td className="p-3">HTTP Cookie</td>
+                <td className="p-3 font-semibold text-secondary">Analytics (Optional)</td>
+                <td className="p-3">Google Analytics 4 session and traffic measurement. Only activated if you click &quot;Accept All&quot;.</td>
+              </tr>
             </tbody>
           </table>
         </div>
