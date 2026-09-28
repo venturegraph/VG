@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { ArticleView } from './ArticleView';
 import { CaseStudyArticle, Post } from '@/types';
 import { stripHtml, resolveSeoTitle } from '@/lib/seo';
+import { serverSanitizeHtml } from '@/lib/sanitize';
 import { getCanonicalPostPath, isCaseStudy } from '@/lib/routes';
 
 interface PageProps {
@@ -69,7 +70,7 @@ async function getArticleData(slug: string): Promise<ArticleDataResult> {
         hqCountry: data.hq_country || 'N/A',
         failureReason: data.failure_reason || 'N/A',
       },
-      htmlContent: data.content || '',
+      htmlContent: serverSanitizeHtml(data.content || ''),
       content: {
         introduction: data.meta_description ? [data.meta_description] : [],
         sections: [

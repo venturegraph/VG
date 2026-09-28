@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { NewsView, ExtendedNewsArticle } from './NewsView';
 import { Post } from '@/types';
 import { stripHtml, resolveSeoTitle } from '@/lib/seo';
+import { serverSanitizeHtml } from '@/lib/sanitize';
 import { getCanonicalPostPath, isNews } from '@/lib/routes';
 
 interface PageProps {
@@ -67,7 +68,7 @@ async function getNewsData(slug: string): Promise<NewsDataResult> {
         name: 'Editorial Team',
         role: 'Venture Graph Forensics',
       },
-      htmlContent: data.content || '',
+      htmlContent: serverSanitizeHtml(data.content || ''),
       content: {
         summary: data.meta_description || '',
         body: (data.content || '').split('\n\n').filter(Boolean),

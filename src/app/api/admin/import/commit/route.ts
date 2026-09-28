@@ -1,26 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import sanitizeHtml from 'sanitize-html';
+import { serverSanitizeHtml } from '@/lib/sanitize';
 import type { ContentType } from '@/types';
 
 export const dynamic = 'force-dynamic';
-
-// Sanitize-html configuration matching the previous DOMPurify settings:
-// USE_PROFILES: { html: true } + ADD_TAGS: ['iframe'] + ADD_ATTR: [target, rel, allowfullscreen, frameborder, data-type]
-const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
-  allowedTags: sanitizeHtml.defaults.allowedTags.concat([
-    'img', 'iframe', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-    'figure', 'figcaption', 'video', 'source', 'picture',
-  ]),
-  allowedAttributes: {
-    ...sanitizeHtml.defaults.allowedAttributes,
-    '*': ['class', 'id', 'style', 'data-type'],
-    a: ['href', 'name', 'target', 'rel'],
-    img: ['src', 'srcset', 'alt', 'title', 'width', 'height', 'loading', 'style'],
-    iframe: ['src', 'width', 'height', 'frameborder', 'allowfullscreen', 'allow', 'title', 'style'],
-  },
-  allowedIframeHostnames: ['www.youtube.com', 'youtube.com', 'player.vimeo.com', 'www.google.com'],
-};
 
 // ---------------------------------------------------------------------------
 // Request / response shapes
@@ -125,9 +108,8 @@ export async function POST(request: NextRequest) {
     };
 
     // Sanitize HTML content — same coverage as previous DOMPurify config
-    const sanitizedContent = sanitizeHtml(
-      post.contentEncoded ?? '',
-      SANITIZE_OPTIONS
+    const sanitizedContent = serverSanitizeHtml(
+      post.contentEncoded ?? ''
     );
 
     // Build the row to insert

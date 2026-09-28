@@ -20,7 +20,6 @@ import {
   SECONDARY_NAV_ITEMS,
 } from '@/lib/taxonomy';
 import { NewsArticle, Post } from '@/types';
-import DOMPurify from 'dompurify';
 
 export interface ExtendedNewsArticle extends NewsArticle {
   htmlContent?: string;
@@ -207,10 +206,7 @@ export function NewsView({
               <div
                 className="article-html-content prose dark:prose-invert font-body-base text-base text-on-surface leading-relaxed max-w-3xl"
                 dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(article.htmlContent, {
-                    ADD_TAGS: ['iframe'],
-                    ADD_ATTR: ['target', 'rel', 'allowfullscreen', 'frameborder', 'data-type'],
-                  }),
+                  __html: article.htmlContent,
                 }}
               />
             ) : (

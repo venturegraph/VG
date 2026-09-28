@@ -18,7 +18,6 @@ import {
   SECONDARY_NAV_ITEMS,
 } from '@/lib/taxonomy';
 import { HubArticle } from '@/types';
-import DOMPurify from 'dompurify';
 
 export interface ExtendedHubArticle extends HubArticle {
   htmlContent?: string;
@@ -179,20 +178,14 @@ export function LessonView({
                 <div
                   className="article-html-content prose dark:prose-invert font-body-base text-base text-on-surface leading-relaxed max-w-none my-4"
                   dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(
-                      article.htmlContent.replace(/<img\s+([^>]*?)>/gi, (_match, attrs) => {
-                        let updated = attrs;
-                        if (!/loading=/i.test(updated)) updated += ' loading="lazy"';
-                        if (!/aspect-ratio/i.test(updated) && !/width=/i.test(updated)) {
-                          updated += ' style="aspect-ratio: 16/9; width: 100%; height: auto;"';
-                        }
-                        return `<img ${updated}>`;
-                      }),
-                      {
-                        ADD_TAGS: ['iframe'],
-                        ADD_ATTR: ['target', 'rel', 'allowfullscreen', 'frameborder', 'data-type', 'loading', 'style', 'width', 'height'],
+                    __html: article.htmlContent.replace(/<img\s+([^>]*?)>/gi, (_match, attrs) => {
+                      let updated = attrs;
+                      if (!/loading=/i.test(updated)) updated += ' loading="lazy"';
+                      if (!/aspect-ratio/i.test(updated) && !/width=/i.test(updated)) {
+                        updated += ' style="aspect-ratio: 16/9; width: 100%; height: auto;"';
                       }
-                    ),
+                      return `<img ${updated}>`;
+                    }),
                   }}
                 />
               ) : null}

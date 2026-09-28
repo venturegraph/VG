@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { LessonView, ExtendedHubArticle } from './LessonView';
 import { HubArticle } from '@/types';
 import { stripHtml, resolveSeoTitle } from '@/lib/seo';
+import { serverSanitizeHtml } from '@/lib/sanitize';
 import { getCanonicalPostPath, isLesson } from '@/lib/routes';
 
 interface PageProps {
@@ -59,7 +60,7 @@ async function getLessonData(slug: string): Promise<LessonDataResult> {
       },
       introduction: data.meta_description ? [data.meta_description] : [],
       lessons: [],
-      htmlContent: data.content || '',
+      htmlContent: serverSanitizeHtml(data.content || ''),
     };
 
     // Fetch related lessons

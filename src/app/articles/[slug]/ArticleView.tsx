@@ -21,7 +21,6 @@ import {
   SECONDARY_NAV_ITEMS,
 } from '@/lib/taxonomy';
 import { CaseStudyArticle, Post } from '@/types';
-import DOMPurify from 'dompurify';
 
 interface ArticleViewProps {
   initialArticle: CaseStudyArticle;
@@ -263,9 +262,7 @@ export function ArticleView({
                 <div
                   className="article-rich-content prose dark:prose-invert max-w-none text-on-surface leading-relaxed"
                   dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(processedHtml, {
-                      ADD_ATTR: ['target', 'rel', 'id', 'class', 'loading', 'style', 'width', 'height'],
-                    }),
+                    __html: processedHtml,
                   }}
                 />
               ) : (
