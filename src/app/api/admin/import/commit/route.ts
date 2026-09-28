@@ -1,9 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import DOMPurify from 'isomorphic-dompurify';
+import sanitizeHtml from 'sanitize-html';
 import type { ContentType } from '@/types';
 
 export const dynamic = 'force-dynamic';
+
+// Sanitize-html configuration matching the previous DOMPurify settings:
+// USE_PROFILES: { html: true } + ADD_TAGS: ['iframe'] + ADD_ATTR: [target, rel, allowfullscreen, frameborder, data-type]
+const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
+  allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+    'img', 'iframe', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'figure', 'figcaption', 'video', 'source', 'picture',
+  ]),
+  allowedAttributes: {
+    ...sanitizeHtml.defaults.allowedAttributes,
+    '*': ['class', 'id', 'style', 'data-type'],
+    a: ['href', 'name', 'target', 'rel'],
+    img: ['src', 'srcset', 'alt', 'title', 'width', 'height', 'loading', 'style'],
+    iframe: ['src', 'width', 'height', 'frameborder', 'allowfullscreen', 'allow', 'title', 'style'],
+  },
+  allowedIframeHostnames: ['www.youtube.com', 'youtube.com', 'player.vimeo.com', 'www.google.com'],
+};
 
 // ---------------------------------------------------------------------------
 // Request / response shapes
@@ -107,15 +124,10 @@ export async function POST(request: NextRequest) {
       title: post.title,
     };
 
-    // Sanitize HTML content — same config as PostForm.tsx:352
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sanitizedContent = (DOMPurify as any).sanitize(
+    // Sanitize HTML content — same coverage as previous DOMPurify config
+    const sanitizedContent = sanitizeHtml(
       post.contentEncoded ?? '',
-      {
-        USE_PROFILES: { html: true },
-        ADD_TAGS: ['iframe'],
-        ADD_ATTR: ['target', 'rel', 'allowfullscreen', 'frameborder', 'data-type'],
-      }
+      SANITIZE_OPTIONS
     );
 
     // Build the row to insert

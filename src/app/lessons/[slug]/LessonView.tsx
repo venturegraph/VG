@@ -18,7 +18,7 @@ import {
   SECONDARY_NAV_ITEMS,
 } from '@/lib/taxonomy';
 import { HubArticle } from '@/types';
-import DOMPurify from 'isomorphic-dompurify';
+import DOMPurify from 'dompurify';
 
 export interface ExtendedHubArticle extends HubArticle {
   htmlContent?: string;

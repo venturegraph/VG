@@ -8,7 +8,7 @@ import { ContentType, PostStatus } from '@/types';
 import { slugify, resolveSeoTitle } from '@/lib/seo';
 import { PARENT_TAXONOMY } from '@/lib/taxonomy';
 import { formatStatus } from '@/lib/formatStatus';
-import DOMPurify from 'isomorphic-dompurify';
+import DOMPurify from 'dompurify';
 import { analyzeRankMathSEO, RankMathAnalysisResult } from '@/lib/rankMathAnalysis';
 
 import { ContentTypeSelect } from './ContentTypeSelect';

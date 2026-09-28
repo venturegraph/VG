@@ -21,7 +21,7 @@ import {
   SECONDARY_NAV_ITEMS,
 } from '@/lib/taxonomy';
 import { CaseStudyArticle, Post } from '@/types';
-import DOMPurify from 'isomorphic-dompurify';
+import DOMPurify from 'dompurify';
 
 interface ArticleViewProps {
   initialArticle: CaseStudyArticle;

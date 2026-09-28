@@ -20,7 +20,7 @@ import {
   SECONDARY_NAV_ITEMS,
 } from '@/lib/taxonomy';
 import { NewsArticle, Post } from '@/types';
-import DOMPurify from 'isomorphic-dompurify';
+import DOMPurify from 'dompurify';
 
 export interface ExtendedNewsArticle extends NewsArticle {
   htmlContent?: string;

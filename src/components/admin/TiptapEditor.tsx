@@ -6,7 +6,7 @@ import { Mark, Node, mergeAttributes } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import LinkExtension from '@tiptap/extension-link';
 import ImageExtension from '@tiptap/extension-image';
-import DOMPurify from 'isomorphic-dompurify';
+import DOMPurify from 'dompurify';
 
 export const IconSpan = Mark.create({
   name: 'iconSpan',
