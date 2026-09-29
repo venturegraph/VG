@@ -12,6 +12,7 @@ import {
   AtAGlanceStats,
   LessonsCallout,
   ArticleTableOfContents,
+  ShareBar,
 } from '@/components';
 import { ReadingProgressBar } from '@/components/ReadingProgressBar';
 import { CopyLinkButton } from '@/components/CopyLinkButton';
@@ -334,6 +335,13 @@ export function ArticleView({
                   })}
                 </div>
               )}
+
+              {/* Share Bar */}
+              <ShareBar
+                title={article.title}
+                slug={article.slug}
+                contentType="case_study"
+              />
 
               {/* Editorial Disclaimer */}
               <div className="mt-8 pt-6 border-t border-outline-variant/20 text-xs text-secondary leading-relaxed bg-surface-container-low p-4 rounded-xl">

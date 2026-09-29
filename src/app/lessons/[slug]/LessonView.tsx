@@ -9,6 +9,7 @@ import {
   Footer,
   TableOfContents,
   HubCaseStudyCard,
+  ShareBar,
 } from '@/components';
 import { ReadingProgressBar } from '@/components/ReadingProgressBar';
 import { CopyLinkButton } from '@/components/CopyLinkButton';
@@ -259,6 +260,13 @@ export function LessonView({
                   <p className="text-on-surface-variant leading-relaxed">{article.conclusion}</p>
                 </div>
               )}
+
+              {/* Share Bar */}
+              <ShareBar
+                title={article.title}
+                slug={article.slug}
+                contentType="lessons_hub"
+              />
 
               {/* Reader Comments */}
               <CommentSection postId={article.id} postTitle={article.title} />

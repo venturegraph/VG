@@ -11,6 +11,7 @@ import {
   Footer,
   FundingMetricsBar,
   CaseStudyFunnelCard,
+  ShareBar,
 } from '@/components';
 import { ReadingProgressBar } from '@/components/ReadingProgressBar';
 import { CopyLinkButton } from '@/components/CopyLinkButton';
@@ -254,6 +255,13 @@ export function NewsView({
                 )}
               </blockquote>
             )}
+
+            {/* Share Bar */}
+            <ShareBar
+              title={article.title}
+              slug={article.slug}
+              contentType="news"
+            />
 
             {/* Verification Disclaimer */}
             <div className="pt-4 border-t border-outline-variant/20 text-xs text-secondary leading-relaxed">

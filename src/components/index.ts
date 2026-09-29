@@ -19,3 +19,5 @@ export * from './CategoryFilterPills';
 export * from './ArticleTableOfContents';
 export * from './CookieBanner';
 export * from './LegalPageLayout';
+export * from './ReadingProgressBar';
+export * from './ShareBar';
