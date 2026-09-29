@@ -204,8 +204,11 @@ export const Footer: React.FC = () => {
         {/* ── COPYRIGHT BAR ─────────────────────────────────────────────────── */}
         <div className="pt-8 flex flex-col md:flex-row md:items-center justify-between gap-4 text-[11px] text-gray-400">
           <div className="space-y-1">
-            <p className="font-medium text-white tracking-wider">
-              © {currentYear} Venture Graph. All rights reserved.
+            <p className="font-medium text-white tracking-wider flex items-center gap-2">
+              <span>© {currentYear} Venture Graph. All rights reserved.</span>
+              <span className="text-[10px] font-mono text-gray-400 border border-white/10 rounded px-1.5 py-0.5 font-normal tracking-normal">
+                v2.0.0
+              </span>
             </p>
             <p className="text-gray-500 max-w-2xl leading-normal">
               Market intelligence compiled from public filings, court records, and verified direct reporting. Not financial or investment advice.
