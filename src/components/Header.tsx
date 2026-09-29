@@ -56,7 +56,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [currentDate, setCurrentDate] = useState('Thursday, October 24, 2024');
+  const [currentDate, setCurrentDate] = useState('');
   const [tickerPosts, setTickerPosts] = useState<TickerPost[]>([]);
   const [tickerLoading, setTickerLoading] = useState(true);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -249,7 +249,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-3 overflow-hidden">
             <span
               id="header-current-date"
-              className="font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider text-[11px] whitespace-nowrap"
+              className="font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider text-[11px] whitespace-nowrap min-w-[190px] inline-block"
             >
               {currentDate}
             </span>
