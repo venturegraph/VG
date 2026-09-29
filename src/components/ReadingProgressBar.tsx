@@ -28,9 +28,15 @@ export const ReadingProgressBar: React.FC<ReadingProgressBarProps> = ({
 
       const rect = target.getBoundingClientRect();
       const vh = window.innerHeight || document.documentElement.clientHeight;
+      const headerOffset =
+        parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            '--header-height'
+          )
+        ) || 0;
 
-      // 0% when top reaches the viewport top (or is below it)
-      if (rect.top >= 0) {
+      // 0% when top reaches the bottom of the header (or is below it)
+      if (rect.top >= headerOffset) {
         setProgress(0);
         return;
       }
@@ -41,14 +47,14 @@ export const ReadingProgressBar: React.FC<ReadingProgressBarProps> = ({
         return;
       }
 
-      // Progress through the element between top reaching 0 and bottom reaching vh
-      const totalDistance = rect.height - vh;
+      // Progress through the element between top reaching headerOffset and bottom reaching vh
+      const totalDistance = rect.height - (vh - headerOffset);
       if (totalDistance <= 0) {
-        setProgress(rect.top <= 0 ? 100 : 0);
+        setProgress(rect.top <= headerOffset ? 100 : 0);
         return;
       }
 
-      const scrolled = -rect.top;
+      const scrolled = headerOffset - rect.top;
       const pct = Math.min(100, Math.max(0, (scrolled / totalDistance) * 100));
       setProgress(pct);
     };
@@ -93,7 +99,8 @@ export const ReadingProgressBar: React.FC<ReadingProgressBarProps> = ({
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 w-full h-[3px] bg-transparent z-[60] pointer-events-none"
+      className="fixed left-0 right-0 w-full h-[3px] bg-transparent z-[60] pointer-events-none"
+      style={{ top: 'var(--header-height, 11rem)' }}
       aria-hidden="true"
     >
       <div
