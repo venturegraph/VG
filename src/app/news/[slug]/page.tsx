@@ -6,6 +6,7 @@ import { Post } from '@/types';
 import { stripHtml, resolveSeoTitle } from '@/lib/seo';
 import { calculateReadTime } from '@/lib/readTime';
 import { getUpdatedDateIfEligible, isUpdatedEligible } from '@/lib/dateUtils';
+import { generateArticleJsonLd, generateBreadcrumbJsonLd, serializeJsonLd } from '@/lib/jsonld';
 import { serverSanitizeHtml } from '@/lib/sanitize';
 import { getCanonicalPostPath, isNews } from '@/lib/routes';
 
@@ -186,15 +187,43 @@ export default async function NewsPage({ params }: PageProps) {
     permanentRedirect(result.redirectUrl);
   }
 
-  if (!result.article) {
+  if (!result.article || !result.raw) {
     notFound();
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://venturegraph.me';
+  const post = result.raw;
+  const canonicalUrl = `${siteUrl}/news/${post.slug}`;
+  const articleJsonLd = generateArticleJsonLd({
+    title: post.title,
+    description: post.meta_description || post.title,
+    url: canonicalUrl,
+    imageUrl: post.featured_image_url || undefined,
+    publishedAt: post.published_at,
+    updatedAt: post.updated_at,
+    siteUrl,
+  });
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+    { name: 'Home', url: siteUrl },
+    { name: 'Funding News', url: `${siteUrl}/#new-fundings` },
+    { name: result.article.category, url: canonicalUrl },
+  ]);
+
   return (
-    <NewsView
-      slug={params.slug}
-      initialArticle={result.article}
-      initialRelatedNews={result.relatedNews}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
+      />
+      <NewsView
+        slug={params.slug}
+        initialArticle={result.article}
+        initialRelatedNews={result.relatedNews}
+      />
+    </>
   );
 }
