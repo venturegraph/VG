@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { NewsView, ExtendedNewsArticle } from './NewsView';
 import { Post } from '@/types';
 import { stripHtml, resolveSeoTitle } from '@/lib/seo';
+import { calculateReadTime } from '@/lib/readTime';
 import { serverSanitizeHtml } from '@/lib/sanitize';
 import { getCanonicalPostPath, isNews } from '@/lib/routes';
 
@@ -60,7 +61,7 @@ async function getNewsData(slug: string): Promise<NewsDataResult> {
             year: 'numeric',
           })
         : 'Recent Dispatch',
-      readTime: '4 min read',
+      readTime: calculateReadTime(data.content, '4 min read'),
       excerpt: data.meta_description || data.title,
       image: data.featured_image_url || undefined,
       amount: data.total_raised || undefined,
@@ -78,7 +79,7 @@ async function getNewsData(slug: string): Promise<NewsDataResult> {
     // Fetch related news
     const { data: relatedData } = await supabase
       .from('posts')
-      .select('id, title, slug, content_type, category, published_at, meta_description, total_raised, featured_image_url')
+      .select('id, title, slug, content_type, category, content, published_at, meta_description, total_raised, featured_image_url')
       .neq('content_type', 'case_study')
       .neq('content_type', 'lessons_hub')
       .neq('content_type', 'lessons')
@@ -101,7 +102,7 @@ async function getNewsData(slug: string): Promise<NewsDataResult> {
             year: 'numeric',
           })
         : 'Recent',
-      readTime: '4 min read',
+      readTime: calculateReadTime(item.content, '4 min read'),
       excerpt: item.meta_description || item.title,
       amount: item.total_raised || undefined,
       image: item.featured_image_url || undefined,

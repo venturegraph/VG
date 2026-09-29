@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { CategoryView } from './CategoryView';
 import { Post, PostType } from '@/types';
 import { getCategoryMetadata } from '@/lib/taxonomy';
+import { calculateReadTime } from '@/lib/readTime';
 
 interface PageProps {
   params: { slug: string };
@@ -131,7 +132,7 @@ async function getCategoryPosts(slug: string): Promise<Post[]> {
         category: p.subcategory || p.category || (p.content_type === 'case_study' ? 'Case Study' : 'News'),
         subcategory: p.subcategory || undefined,
         publishDate: formattedDate,
-        readTime: '5 min read',
+        readTime: calculateReadTime(p.content, '5 min read'),
         excerpt: p.meta_description || (p.content ? p.content.replace(/<[^>]*>/g, '').slice(0, 160) + '...' : p.title),
         image: p.featured_image_url || undefined,
         amount: p.total_raised || undefined,

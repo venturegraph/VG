@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { LessonView, ExtendedHubArticle } from './LessonView';
 import { HubArticle } from '@/types';
 import { stripHtml, resolveSeoTitle } from '@/lib/seo';
+import { calculateReadTime } from '@/lib/readTime';
 import { serverSanitizeHtml } from '@/lib/sanitize';
 import { getCanonicalPostPath, isLesson } from '@/lib/routes';
 
@@ -53,7 +54,7 @@ async function getLessonData(slug: string): Promise<LessonDataResult> {
             year: 'numeric',
           })
         : 'Curated Guide',
-      readTime: '8 min read',
+      readTime: calculateReadTime(data.content, '8 min read'),
       author: {
         name: 'Editorial Team',
         role: 'Venture Graph Research',
@@ -66,7 +67,7 @@ async function getLessonData(slug: string): Promise<LessonDataResult> {
     // Fetch related lessons
     const { data: relatedData } = await supabase
       .from('posts')
-      .select('id, title, slug, category, meta_description, published_at')
+      .select('id, title, slug, category, content, meta_description, published_at')
       .in('content_type', ['lessons_hub', 'lessons'])
       .eq('status', 'published')
       .is('deleted_at', null)
@@ -87,7 +88,7 @@ async function getLessonData(slug: string): Promise<LessonDataResult> {
             year: 'numeric',
           })
         : 'Recent Archive',
-      readTime: '6 min read',
+      readTime: calculateReadTime(item.content, '6 min read'),
       author: {
         name: 'Editorial Team',
         role: 'Venture Graph Research',

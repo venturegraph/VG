@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { HomeView } from './HomeView';
 import { Post, PostType, TrendingPost } from '@/types';
+import { calculateReadTime } from '@/lib/readTime';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,7 +55,7 @@ function formatPost(p: any, forcedType?: PostType): Post {
     category: p.subcategory || p.category || (p.content_type === 'case_study' ? 'Case Study' : 'News'),
     subcategory: p.subcategory || undefined,
     publishDate: formattedDate,
-    readTime: '6 min read',
+    readTime: calculateReadTime(p.content, '6 min read'),
     excerpt: p.meta_description || (p.content ? p.content.replace(/<[^>]*>/g, '').slice(0, 160) + '...' : p.title),
     image: p.featured_image_url || undefined,
     amount: p.total_raised || undefined,

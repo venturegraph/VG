@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { ArticleView } from './ArticleView';
 import { CaseStudyArticle, Post } from '@/types';
 import { stripHtml, resolveSeoTitle } from '@/lib/seo';
+import { calculateReadTime } from '@/lib/readTime';
 import { serverSanitizeHtml } from '@/lib/sanitize';
 import { getCanonicalPostPath, isCaseStudy } from '@/lib/routes';
 
@@ -53,7 +54,7 @@ async function getArticleData(slug: string): Promise<ArticleDataResult> {
             year: 'numeric',
           })
         : 'Draft Preview',
-      readTime: '5 min read',
+      readTime: calculateReadTime(data.content, '5 min read'),
       excerpt: data.meta_description || data.title,
       subtitle: data.meta_description || '',
       image: data.featured_image_url || undefined,
@@ -85,7 +86,7 @@ async function getArticleData(slug: string): Promise<ArticleDataResult> {
     // Fetch related case studies
     const { data: relatedData } = await supabase
       .from('posts')
-      .select('id, title, slug, content_type, category, published_at, meta_description, featured_image_url')
+      .select('id, title, slug, content_type, category, content, published_at, meta_description, featured_image_url')
       .eq('content_type', 'case_study')
       .eq('status', 'published')
       .is('deleted_at', null)
@@ -106,7 +107,7 @@ async function getArticleData(slug: string): Promise<ArticleDataResult> {
             year: 'numeric',
           })
         : 'Recent',
-      readTime: '6 min read',
+      readTime: calculateReadTime(item.content, '6 min read'),
       excerpt: item.meta_description || item.title,
       image: item.featured_image_url || undefined,
     }));
