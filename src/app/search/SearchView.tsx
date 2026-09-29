@@ -14,7 +14,7 @@ interface SearchPost {
   id: string;
   title: string;
   slug: string;
-  excerpt: string | null;
+  meta_description: string | null;
   content_type: string | null;
   published_at: string | null;
   category: string | null;
@@ -91,10 +91,10 @@ export function SearchView() {
         const cleanQuery = q.trim().replace(/[%_,]/g, '');
         const { data, error } = await supabase
           .from('posts')
-          .select('id, title, slug, excerpt, content_type, published_at, category, subcategory, total_raised')
+          .select('id, title, slug, meta_description, content_type, published_at, category, subcategory, total_raised')
           .eq('status', 'published')
           .is('deleted_at', null)
-          .or(`title.ilike.%${cleanQuery}%,excerpt.ilike.%${cleanQuery}%,category.ilike.%${cleanQuery}%,subcategory.ilike.%${cleanQuery}%`)
+          .or(`title.ilike.%${cleanQuery}%,meta_description.ilike.%${cleanQuery}%,slug.ilike.%${cleanQuery}%,category.ilike.%${cleanQuery}%,subcategory.ilike.%${cleanQuery}%`)
           .order('published_at', { ascending: false })
           .limit(30);
 
@@ -321,9 +321,9 @@ export function SearchView() {
                       </Link>
                     </h3>
 
-                    {item.excerpt && (
+                    {item.meta_description && (
                       <p className="text-sm text-secondary leading-relaxed line-clamp-2 max-w-3xl">
-                        {item.excerpt}
+                        {item.meta_description}
                       </p>
                     )}
                   </article>

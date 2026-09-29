@@ -23,7 +23,7 @@ interface SearchResultItem {
   id: string;
   title: string;
   slug: string;
-  excerpt: string | null;
+  meta_description?: string | null;
   content_type: string | null;
   published_at: string | null;
 }
@@ -181,10 +181,10 @@ export const Header: React.FC<HeaderProps> = ({
         const cleanQuery = trimmed.replace(/[%_,]/g, '');
         const { data, error } = await supabase
           .from('posts')
-          .select('id, title, slug, excerpt, content_type, published_at')
+          .select('id, title, slug, meta_description, content_type, published_at')
           .eq('status', 'published')
           .is('deleted_at', null)
-          .or(`title.ilike.%${cleanQuery}%,excerpt.ilike.%${cleanQuery}%`)
+          .or(`title.ilike.%${cleanQuery}%,meta_description.ilike.%${cleanQuery}%,slug.ilike.%${cleanQuery}%,category.ilike.%${cleanQuery}%,subcategory.ilike.%${cleanQuery}%`)
           .order('published_at', { ascending: false })
           .limit(6);
 
@@ -415,9 +415,9 @@ export const Header: React.FC<HeaderProps> = ({
                       <div className="text-sm font-bold text-slate-dark dark:text-gray-100 leading-snug">
                         {item.title}
                       </div>
-                      {item.excerpt && (
+                      {item.meta_description && (
                         <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mt-1 font-normal">
-                          {item.excerpt}
+                          {item.meta_description}
                         </p>
                       )}
                     </Link>
