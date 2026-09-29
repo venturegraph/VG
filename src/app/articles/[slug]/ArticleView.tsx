@@ -13,6 +13,7 @@ import {
   LessonsCallout,
   ArticleTableOfContents,
 } from '@/components';
+import { ReadingProgressBar } from '@/components/ReadingProgressBar';
 import { CopyLinkButton } from '@/components/CopyLinkButton';
 import { BookmarkButton } from '@/components/BookmarkButton';
 import { CommentSection } from '@/components/comments/CommentSection';
@@ -36,6 +37,7 @@ export function ArticleView({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const articleBodyRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -138,6 +140,7 @@ export function ArticleView({
 
   return (
     <div className="min-h-screen bg-background text-on-surface flex flex-col selection:bg-primary-container selection:text-on-primary">
+      <ReadingProgressBar targetRef={articleBodyRef} />
       {/* Top Header & Brand Bar */}
       <Header
         isDarkMode={isDarkMode}
@@ -260,13 +263,14 @@ export function ArticleView({
               {/* WordPress / Rich Text Content or Structured Sections */}
               {processedHtml ? (
                 <div
+                  ref={articleBodyRef}
                   className="article-rich-content prose dark:prose-invert max-w-none text-on-surface leading-relaxed"
                   dangerouslySetInnerHTML={{
                     __html: processedHtml,
                   }}
                 />
               ) : (
-                <>
+                <div ref={articleBodyRef}>
                   {article.content?.introduction?.map((para, idx) => (
                     <p
                       key={idx}
@@ -328,7 +332,7 @@ export function ArticleView({
                       </section>
                     );
                   })}
-                </>
+                </div>
               )}
 
               {/* Editorial Disclaimer */}

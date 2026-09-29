@@ -10,6 +10,7 @@ import {
   TableOfContents,
   HubCaseStudyCard,
 } from '@/components';
+import { ReadingProgressBar } from '@/components/ReadingProgressBar';
 import { CopyLinkButton } from '@/components/CopyLinkButton';
 import { BookmarkButton } from '@/components/BookmarkButton';
 import { CommentSection } from '@/components/comments/CommentSection';
@@ -36,6 +37,7 @@ export function LessonView({
 }: LessonViewProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const articleBodyRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -67,6 +69,7 @@ export function LessonView({
 
   return (
     <div className="min-h-screen bg-background text-on-surface flex flex-col selection:bg-primary-container selection:text-on-primary">
+      <ReadingProgressBar targetRef={articleBodyRef} />
       {/* Header */}
       <Header
         isDarkMode={isDarkMode}
@@ -176,6 +179,7 @@ export function LessonView({
               {/* Real HTML Article Content from Supabase */}
               {article.htmlContent && article.htmlContent.includes('<') ? (
                 <div
+                  ref={articleBodyRef}
                   className="article-html-content prose dark:prose-invert font-body-base text-base text-on-surface leading-relaxed max-w-none my-4"
                   dangerouslySetInnerHTML={{
                     __html: article.htmlContent.replace(/<img\s+([^>]*?)>/gi, (_match, attrs) => {
@@ -192,7 +196,7 @@ export function LessonView({
 
               {/* Numbered Lessons List if structured */}
               {article.lessons && article.lessons.length > 0 && (
-                <div className="space-y-12 mt-4">
+                <div ref={!article.htmlContent ? articleBodyRef : undefined} className="space-y-12 mt-4">
                   {article.lessons.map((lesson) => (
                     <section
                       key={lesson.id}

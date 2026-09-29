@@ -12,6 +12,7 @@ import {
   FundingMetricsBar,
   CaseStudyFunnelCard,
 } from '@/components';
+import { ReadingProgressBar } from '@/components/ReadingProgressBar';
 import { CopyLinkButton } from '@/components/CopyLinkButton';
 import { BookmarkButton } from '@/components/BookmarkButton';
 import { CommentSection } from '@/components/comments/CommentSection';
@@ -39,6 +40,7 @@ export function NewsView({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const articleBodyRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -70,6 +72,7 @@ export function NewsView({
 
   return (
     <div className="min-h-screen bg-background text-on-surface flex flex-col selection:bg-primary-container selection:text-on-primary">
+      <ReadingProgressBar targetRef={articleBodyRef} />
       {/* Header */}
       <Header
         isDarkMode={isDarkMode}
@@ -204,17 +207,20 @@ export function NewsView({
 
             {article.htmlContent && article.htmlContent.includes('<') ? (
               <div
+                ref={articleBodyRef}
                 className="article-html-content prose dark:prose-invert font-body-base text-base text-on-surface leading-relaxed max-w-3xl"
                 dangerouslySetInnerHTML={{
                   __html: article.htmlContent,
                 }}
               />
             ) : (
-              article.content.body.map((para, idx) => (
-                <p key={idx} className="text-on-surface-variant leading-relaxed">
-                  {para}
-                </p>
-              ))
+              <div ref={articleBodyRef}>
+                {article.content.body.map((para, idx) => (
+                  <p key={idx} className="text-on-surface-variant leading-relaxed">
+                    {para}
+                  </p>
+                ))}
+              </div>
             )}
 
             {/* Key Terms Box */}
