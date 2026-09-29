@@ -7,23 +7,66 @@ import { trackEvent } from '@/lib/analytics';
 export const Newsletter: React.FC = () => {
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email && consent) {
-      setIsSubscribed(true);
-      setEmail('');
-      trackEvent('form_submit_success', {
-        form_name: 'newsletter',
-        form_id: 'newsletter-signup',
-      });
-    } else {
+    setErrorMessage(null);
+
+    if (!email || !consent) {
       trackEvent('form_submit_error', {
         form_name: 'newsletter',
         form_id: 'newsletter-signup',
         error_reason: !consent ? 'consent_unchecked' : 'missing_email',
       });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const sourcePath = typeof window !== 'undefined' ? window.location.pathname : '/';
+      const response = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          consent,
+          source_path: sourcePath,
+          honeypot,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.ok && data.success) {
+        setIsSubscribed(true);
+        setEmail('');
+        setErrorMessage(null);
+        trackEvent('form_submit_success', {
+          form_name: 'newsletter',
+          form_id: 'newsletter-signup',
+        });
+      } else {
+        const errorText = data.error || 'Failed to subscribe. Please try again.';
+        setErrorMessage(errorText);
+        trackEvent('form_submit_error', {
+          form_name: 'newsletter',
+          form_id: 'newsletter-signup',
+          error_reason: 'api_error',
+        });
+      }
+    } catch {
+      setErrorMessage('Unable to connect. Please check your internet connection.');
+      trackEvent('form_submit_error', {
+        form_name: 'newsletter',
+        form_id: 'newsletter-signup',
+        error_reason: 'network_error',
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -61,6 +104,18 @@ export const Newsletter: React.FC = () => {
               className="w-full md:w-auto flex flex-col shrink-0 max-w-md"
               onSubmit={handleSubmit}
             >
+              {/* Hidden honeypot field for bot mitigation */}
+              <input
+                type="text"
+                name="company_title_hp"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                className="hidden"
+              />
+
               <div className="flex flex-col sm:flex-row gap-2.5">
                 <label htmlFor="newsletter-email" className="sr-only">
                   Email address
@@ -75,16 +130,26 @@ export const Newsletter: React.FC = () => {
                   required
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errorMessage) setErrorMessage(null);
+                  }}
                 />
                 <button
                   className="px-6 py-3 bg-accent-orange hover:opacity-90 disabled:opacity-50 text-white text-[11px] font-extrabold uppercase tracking-widest transition-opacity shrink-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-orange focus-visible:ring-offset-2 focus-visible:ring-offset-slate-dark"
-                  disabled={!consent}
+                  disabled={!consent || isSubmitting}
                   type="submit"
                 >
-                  Subscribe
+                  {isSubmitting ? 'Subscribing...' : 'Subscribe'}
                 </button>
               </div>
+
+              {/* Error message display */}
+              {errorMessage && (
+                <p role="alert" className="mt-2 text-xs text-[#FA654D] font-medium leading-tight">
+                  {errorMessage}
+                </p>
+              )}
 
               {/* GDPR / CAN-SPAM Consent Checkbox */}
               <label htmlFor="newsletter-consent" className="flex items-start gap-2.5 mt-3 cursor-pointer text-xs text-gray-400 select-none">
