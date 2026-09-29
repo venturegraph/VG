@@ -265,7 +265,15 @@ export function NewsView({
 
             {/* Verification Disclaimer */}
             <div className="pt-4 border-t border-outline-variant/20 text-xs text-secondary leading-relaxed">
-              <span className="font-semibold text-on-surface">Verification:</span> Figures reported reflect audited filings, direct stakeholder confirmations, or company disclosures published on the date indicated above.
+              <span className="font-semibold text-on-surface">Verification:</span> Figures reflect company disclosures and public reporting as of the date shown. See our{' '}
+              <Link href="/editorial-standards" className="underline font-medium hover:text-on-surface transition-colors">
+                Editorial Standards
+              </Link>
+              , or report an error via{' '}
+              <Link href="/corrections" className="underline font-medium hover:text-on-surface transition-colors">
+                Corrections
+              </Link>
+              .
             </div>
 
             {/* Reader Comments */}

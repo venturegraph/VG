@@ -345,7 +345,15 @@ export function ArticleView({
 
               {/* Editorial Disclaimer */}
               <div className="mt-8 pt-6 border-t border-outline-variant/20 text-xs text-secondary leading-relaxed bg-surface-container-low p-4 rounded-xl">
-                <span className="font-bold text-on-surface">Editorial Note:</span> This post-mortem is compiled from public SEC regulatory filings, Delaware bankruptcy proceedings, verified investor disclosures, and former executive interviews. Figures reflect all available capital tranches at time of liquidation.
+                <span className="font-bold text-on-surface">Editorial Note:</span> This case study is compiled from public reporting and company disclosures. Sources are cited in the text, and figures reported differently by different sources are flagged. See our{' '}
+                <Link href="/editorial-standards" className="underline font-medium hover:text-on-surface transition-colors">
+                  Editorial Standards
+                </Link>
+                , or report an error via{' '}
+                <Link href="/corrections" className="underline font-medium hover:text-on-surface transition-colors">
+                  Corrections
+                </Link>
+                .
               </div>
 
               {/* Reader Comments */}
