@@ -5,6 +5,7 @@ import { ArticleView } from './ArticleView';
 import { CaseStudyArticle, Post } from '@/types';
 import { stripHtml, resolveSeoTitle } from '@/lib/seo';
 import { calculateReadTime } from '@/lib/readTime';
+import { getUpdatedDateIfEligible, isUpdatedEligible } from '@/lib/dateUtils';
 import { serverSanitizeHtml } from '@/lib/sanitize';
 import { getCanonicalPostPath, isCaseStudy } from '@/lib/routes';
 
@@ -54,6 +55,7 @@ async function getArticleData(slug: string): Promise<ArticleDataResult> {
             year: 'numeric',
           })
         : 'Draft Preview',
+      updatedDate: getUpdatedDateIfEligible(data.published_at, data.updated_at),
       readTime: calculateReadTime(data.content, '5 min read'),
       excerpt: data.meta_description || data.title,
       subtitle: data.meta_description || '',
@@ -160,7 +162,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${title} | Venture Graph`,
       description,
       publishedTime: post.published_at || undefined,
-      modifiedTime: post.updated_at || undefined,
+      modifiedTime: isUpdatedEligible(post.published_at, post.updated_at) ? post.updated_at : undefined,
       images: [
         {
           url: ogImage,

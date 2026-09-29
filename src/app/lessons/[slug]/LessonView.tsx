@@ -113,6 +113,12 @@ export function LessonView({
               </span>
               <span className="text-secondary">•</span>
               <span className="font-label-sm text-xs text-secondary">{article.publishDate}</span>
+              {article.updatedDate && (
+                <>
+                  <span className="text-secondary">•</span>
+                  <span className="font-label-sm text-xs text-secondary">Updated {article.updatedDate}</span>
+                </>
+              )}
               <span className="text-secondary">•</span>
               <span className="font-label-sm text-xs text-secondary flex items-center gap-1">
                 <span className="material-symbols-outlined text-[14px]">schedule</span>

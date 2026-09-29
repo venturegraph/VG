@@ -142,10 +142,10 @@ export function NewsView({
                   <span className="material-symbols-outlined text-[15px] text-tertiary">schedule</span>
                   {article.timestamp}
                 </span>
-                {article.updatedTime && (
+                {(article.updatedDate || article.updatedTime) && (
                   <>
                     <span>•</span>
-                    <span className="text-primary font-semibold">{article.updatedTime}</span>
+                    <span className="font-medium text-on-surface">Updated {article.updatedDate || article.updatedTime}</span>
                   </>
                 )}
                 <span>•</span>

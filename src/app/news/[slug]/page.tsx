@@ -5,6 +5,7 @@ import { NewsView, ExtendedNewsArticle } from './NewsView';
 import { Post } from '@/types';
 import { stripHtml, resolveSeoTitle } from '@/lib/seo';
 import { calculateReadTime } from '@/lib/readTime';
+import { getUpdatedDateIfEligible, isUpdatedEligible } from '@/lib/dateUtils';
 import { serverSanitizeHtml } from '@/lib/sanitize';
 import { getCanonicalPostPath, isNews } from '@/lib/routes';
 
@@ -61,6 +62,7 @@ async function getNewsData(slug: string): Promise<NewsDataResult> {
             year: 'numeric',
           })
         : 'Recent Dispatch',
+      updatedDate: getUpdatedDateIfEligible(data.published_at, data.updated_at),
       readTime: calculateReadTime(data.content, '4 min read'),
       excerpt: data.meta_description || data.title,
       image: data.featured_image_url || undefined,
@@ -156,7 +158,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${title} | Venture Graph`,
       description,
       publishedTime: post.published_at || undefined,
-      modifiedTime: post.updated_at || undefined,
+      modifiedTime: isUpdatedEligible(post.published_at, post.updated_at) ? post.updated_at : undefined,
       images: [
         {
           url: ogImage,

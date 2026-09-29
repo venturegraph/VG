@@ -90,6 +90,7 @@ export interface HubArticle {
   category: string;
   subtitle: string;
   publishDate: string;
+  updatedDate?: string;
   readTime: string;
   author: Author;
   introduction: string[];
@@ -113,6 +114,7 @@ export interface Post {
   category: string;
   subcategory?: string;
   publishDate: string;
+  updatedDate?: string;
   readTime: string;
   excerpt: string;
   image?: string;

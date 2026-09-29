@@ -5,6 +5,7 @@ import { LessonView, ExtendedHubArticle } from './LessonView';
 import { HubArticle } from '@/types';
 import { stripHtml, resolveSeoTitle } from '@/lib/seo';
 import { calculateReadTime } from '@/lib/readTime';
+import { getUpdatedDateIfEligible, isUpdatedEligible } from '@/lib/dateUtils';
 import { serverSanitizeHtml } from '@/lib/sanitize';
 import { getCanonicalPostPath, isLesson } from '@/lib/routes';
 
@@ -54,6 +55,7 @@ async function getLessonData(slug: string): Promise<LessonDataResult> {
             year: 'numeric',
           })
         : 'Curated Guide',
+      updatedDate: getUpdatedDateIfEligible(data.published_at, data.updated_at),
       readTime: calculateReadTime(data.content, '8 min read'),
       author: {
         name: 'Editorial Team',
@@ -145,7 +147,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${title} | Venture Graph`,
       description,
       publishedTime: post.published_at || undefined,
-      modifiedTime: post.updated_at || undefined,
+      modifiedTime: isUpdatedEligible(post.published_at, post.updated_at) ? post.updated_at : undefined,
       images: [
         {
           url: ogImage,
