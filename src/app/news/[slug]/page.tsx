@@ -46,7 +46,7 @@ async function getNewsData(slug: string): Promise<NewsDataResult> {
       title: data.title,
       slug: data.slug,
       type: 'funding',
-      category: data.category || 'Startup News',
+      category: data.subcategory || data.category || 'Startup News',
       publishDate: data.published_at
         ? new Date(data.published_at).toLocaleDateString('en-US', {
             month: 'short',
@@ -79,7 +79,7 @@ async function getNewsData(slug: string): Promise<NewsDataResult> {
     // Fetch related news
     const { data: relatedData } = await supabase
       .from('posts')
-      .select('id, title, slug, content_type, category, content, published_at, meta_description, total_raised, featured_image_url')
+      .select('id, title, slug, content_type, category, subcategory, content, published_at, meta_description, total_raised, featured_image_url')
       .neq('content_type', 'case_study')
       .neq('content_type', 'lessons_hub')
       .neq('content_type', 'lessons')
@@ -94,7 +94,7 @@ async function getNewsData(slug: string): Promise<NewsDataResult> {
       title: item.title,
       slug: item.slug,
       type: 'news',
-      category: item.category || 'Startup News',
+      category: item.subcategory || item.category || 'Startup News',
       publishDate: item.published_at
         ? new Date(item.published_at).toLocaleDateString('en-US', {
             month: 'short',

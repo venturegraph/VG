@@ -46,7 +46,7 @@ async function getArticleData(slug: string): Promise<ArticleDataResult> {
       title: data.title,
       slug: data.slug,
       type: 'failure',
-      category: data.category || 'Case Study',
+      category: data.subcategory || data.category || 'Case Study',
       publishDate: data.published_at
         ? new Date(data.published_at).toLocaleDateString('en-US', {
             month: 'short',
@@ -86,7 +86,7 @@ async function getArticleData(slug: string): Promise<ArticleDataResult> {
     // Fetch related case studies
     const { data: relatedData } = await supabase
       .from('posts')
-      .select('id, title, slug, content_type, category, content, published_at, meta_description, featured_image_url')
+      .select('id, title, slug, content_type, category, subcategory, content, published_at, meta_description, featured_image_url')
       .eq('content_type', 'case_study')
       .eq('status', 'published')
       .is('deleted_at', null)
@@ -99,7 +99,7 @@ async function getArticleData(slug: string): Promise<ArticleDataResult> {
       title: item.title,
       slug: item.slug,
       type: 'failure',
-      category: item.category || 'Case Study',
+      category: item.subcategory || item.category || 'Case Study',
       publishDate: item.published_at
         ? new Date(item.published_at).toLocaleDateString('en-US', {
             month: 'short',

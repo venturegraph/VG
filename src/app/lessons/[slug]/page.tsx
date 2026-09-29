@@ -45,7 +45,7 @@ async function getLessonData(slug: string): Promise<LessonDataResult> {
       id: data.id,
       title: data.title,
       slug: data.slug,
-      category: data.category || 'Lessons & Insights',
+      category: data.subcategory || data.category || 'Lessons & Insights',
       subtitle: data.meta_description || '',
       publishDate: data.published_at
         ? new Date(data.published_at).toLocaleDateString('en-US', {
@@ -67,7 +67,7 @@ async function getLessonData(slug: string): Promise<LessonDataResult> {
     // Fetch related lessons
     const { data: relatedData } = await supabase
       .from('posts')
-      .select('id, title, slug, category, content, meta_description, published_at')
+      .select('id, title, slug, category, subcategory, content, meta_description, published_at')
       .in('content_type', ['lessons_hub', 'lessons'])
       .eq('status', 'published')
       .is('deleted_at', null)
@@ -79,7 +79,7 @@ async function getLessonData(slug: string): Promise<LessonDataResult> {
       id: item.id,
       title: item.title,
       slug: item.slug,
-      category: item.category || 'Lessons & Insights',
+      category: item.subcategory || item.category || 'Lessons & Insights',
       subtitle: item.meta_description || '',
       publishDate: item.published_at
         ? new Date(item.published_at).toLocaleDateString('en-US', {
