@@ -134,6 +134,26 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-2.5 text-xs font-semibold text-white uppercase tracking-wider">
               <li>
+                <Link href="/about" className="hover:text-accent-orange transition-colors">
+                  About
+                </Link>
+              </li>
+              <li>
+                <Link href="/masthead" className="hover:text-accent-orange transition-colors">
+                  Masthead
+                </Link>
+              </li>
+              <li>
+                <Link href="/editorial-standards" className="hover:text-accent-orange transition-colors">
+                  Editorial Standards
+                </Link>
+              </li>
+              <li>
+                <Link href="/corrections" className="hover:text-accent-orange transition-colors">
+                  Corrections
+                </Link>
+              </li>
+              <li>
                 <Link href="/faq" className="hover:text-accent-orange transition-colors">
                   FAQ
                 </Link>
@@ -141,11 +161,6 @@ export const Footer: React.FC = () => {
               <li>
                 <Link href="/contact" className="hover:text-accent-orange transition-colors">
                   Contact Us
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy-policy" className="hover:text-accent-orange transition-colors">
-                  Editorial Standards
                 </Link>
               </li>
             </ul>
