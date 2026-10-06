@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { formatStatus, formatContentType, formatRole } from '@/lib/formatStatus';
 import { PostStatus, UserRole } from '@/types';
 import { ConfirmModal } from '@/components/admin/ConfirmModal';
+import { getCanonicalPostPath } from '@/lib/routes';
 
 interface AdminPostItem {
   id: string;
@@ -214,7 +215,7 @@ function AdminPostsContent() {
             authorName: item.author_id === currentUserId ? 'You' : 'Editorial Author',
             authorEmail: item.author_id === currentUserId && userEmail ? userEmail : 'staff@venturegraph.me',
             authorRole: item.author_id === currentUserId ? userRole : 'writer',
-            link: `/articles/${item.slug}`,
+            link: getCanonicalPostPath(item.content_type, item.slug),
             isDatabaseRecord: true,
             importSource: item.import_source ?? null,
             seoScore: typeof item.seo_score === 'number' ? item.seo_score : 0,
@@ -1005,7 +1006,7 @@ function AdminPostsContent() {
                           </span>
                         </Link>
                         <div className="flex items-center gap-2 text-[10px] text-secondary font-mono mt-0.5">
-                          <span>/{post.slug}</span>
+                          <span>{post.link}</span>
                           {post.isDatabaseRecord ? (
                             <span className="px-1.5 py-0.2 rounded bg-primary/10 text-primary font-semibold">
                               DB

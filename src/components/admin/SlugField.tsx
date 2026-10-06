@@ -2,11 +2,14 @@
 
 import React, { useState } from 'react';
 import { slugify } from '@/lib/seo';
+import { ContentType } from '@/types';
+import { getRoutePrefix } from '@/lib/routes';
 
 interface SlugFieldProps {
   value: string;
   title: string;
   onChange: (slug: string) => void;
+  contentType?: ContentType;
   isTaken?: boolean;
   isChecking?: boolean;
   disabled?: boolean;
@@ -17,12 +20,14 @@ export const SlugField: React.FC<SlugFieldProps> = ({
   value,
   title,
   onChange,
+  contentType = 'case_study',
   isTaken = false,
   isChecking = false,
   disabled = false,
   onBlurCheck,
 }) => {
   const [isLocked, setIsLocked] = useState(true);
+  const routePrefix = getRoutePrefix(contentType);
 
   const handleRegenerate = () => {
     const generated = slugify(title);
@@ -79,7 +84,7 @@ export const SlugField: React.FC<SlugFieldProps> = ({
 
       <div className="relative flex items-center">
         <div className="h-11 px-3 rounded-l-xl bg-surface-container border border-r-0 border-outline-variant/40 flex items-center text-secondary text-xs font-mono select-none">
-          /articles/
+          /{routePrefix}/
         </div>
         <input
           id="slug-input"
@@ -111,7 +116,7 @@ export const SlugField: React.FC<SlugFieldProps> = ({
       )}
       {!isTaken && value && (
         <p className="text-[11px] text-secondary">
-          Target URL: <span className="font-mono text-primary">https://venturegraph.me/articles/{value}</span>
+          Target URL: <span className="font-mono text-primary">https://venturegraph.me/{routePrefix}/{value}</span>
         </p>
       )}
     </div>

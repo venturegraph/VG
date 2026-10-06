@@ -1,6 +1,7 @@
 import { draftMode } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getCanonicalPostPath } from '@/lib/routes';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
   const supabase = createAdminClient();
   let query = supabase
     .from('posts')
-    .select('id, slug, preview_token, status')
+    .select('id, slug, preview_token, status, content_type')
     .eq('slug', slug)
     .is('deleted_at', null);
 
@@ -38,9 +39,10 @@ export async function GET(request: NextRequest) {
   // Enable Next.js draft mode
   draftMode().enable();
 
-  // Redirect to public article route with preview parameters
+  // Redirect to canonical public route with preview parameters
+  const canonicalPath = getCanonicalPostPath(post.content_type, post.slug);
   const redirectUrl = new URL(
-    `/articles/${encodeURIComponent(post.slug)}?preview=true${token ? `&preview_token=${encodeURIComponent(token)}` : ''}`,
+    `${canonicalPath}?preview=true${token ? `&preview_token=${encodeURIComponent(token)}` : ''}`,
     request.url
   );
 

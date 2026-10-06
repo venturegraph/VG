@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { ContentType } from '@/types';
+import { getCanonicalPostPath, getRoutePrefix } from '@/lib/routes';
 
 interface SnippetEditorModalProps {
   isOpen: boolean;
@@ -12,6 +14,7 @@ interface SnippetEditorModalProps {
   onSlugChange: (val: string) => void;
   metaDescription: string;
   onMetaDescriptionChange: (val: string) => void;
+  contentType?: ContentType;
   canonicalUrl?: string;
   onCanonicalUrlChange?: (val: string) => void;
   isNoindex?: boolean;
@@ -32,6 +35,7 @@ export const SnippetEditorModal: React.FC<SnippetEditorModalProps> = ({
   onSlugChange,
   metaDescription,
   onMetaDescriptionChange,
+  contentType = 'case_study',
   canonicalUrl = '',
   onCanonicalUrlChange,
   isNoindex = false,
@@ -41,6 +45,7 @@ export const SnippetEditorModal: React.FC<SnippetEditorModalProps> = ({
   schemaType = 'Article',
   onSchemaTypeChange,
 }) => {
+  const routePrefix = getRoutePrefix(contentType);
   // Evaluated SEO Title resolving template tags
   const evaluatedTitle = useMemo(() => {
     const raw = seoTitle.trim() || '%title% %sep% %sitename%';
@@ -74,7 +79,7 @@ export const SnippetEditorModal: React.FC<SnippetEditorModalProps> = ({
       ? 'warning'
       : 'error';
 
-  const defaultPermalink = `https://venturegraph.me/articles/${slug || 'post-slug'}`;
+  const defaultPermalink = `https://venturegraph.me${getCanonicalPostPath(contentType, slug || 'post-slug')}`;
 
   if (!isOpen) return null;
 
@@ -116,7 +121,7 @@ export const SnippetEditorModal: React.FC<SnippetEditorModalProps> = ({
             </span>
             <span className="text-on-surface font-medium">venturegraph.me</span>
             <span className="text-secondary/60">›</span>
-            <span>articles</span>
+            <span>{routePrefix}</span>
             <span className="text-secondary/60">›</span>
             <span className="truncate max-w-[200px]">{slug || 'article-slug'}</span>
           </div>
@@ -236,7 +241,7 @@ export const SnippetEditorModal: React.FC<SnippetEditorModalProps> = ({
             </label>
             <div className="flex items-center rounded-xl bg-surface-container-lowest border border-outline-variant/40 overflow-hidden focus-within:border-primary">
               <span className="px-3 py-2 text-xs font-mono text-secondary bg-surface-container-low border-r border-outline-variant/40">
-                venturegraph.me/articles/
+                venturegraph.me/{routePrefix}/
               </span>
               <input
                 type="text"

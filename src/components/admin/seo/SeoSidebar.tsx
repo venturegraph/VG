@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { SeoAnalysisResult, SeoCheck, ChecklistGroup } from '@/lib/seoAnalysis';
 import { SnippetEditorModal } from './SnippetEditorModal';
+import { ContentType } from '@/types';
+import { getCanonicalPostPath, getRoutePrefix } from '@/lib/routes';
 
 export interface SeoSidebarProps {
   analysis: SeoAnalysisResult;
@@ -17,6 +19,7 @@ export interface SeoSidebarProps {
   onFocusKeywordChange: (val: string) => void;
   secondaryKeywords: string[];
   onSecondaryKeywordsChange: (keywords: string[]) => void;
+  contentType?: ContentType;
   canonicalUrl?: string;
   onCanonicalUrlChange?: (val: string) => void;
   isNoindex?: boolean;
@@ -41,6 +44,7 @@ export const SeoSidebar: React.FC<SeoSidebarProps> = ({
   onFocusKeywordChange,
   secondaryKeywords,
   onSecondaryKeywordsChange,
+  contentType = 'case_study',
   canonicalUrl = '',
   onCanonicalUrlChange,
   isNoindex = false,
@@ -51,6 +55,7 @@ export const SeoSidebar: React.FC<SeoSidebarProps> = ({
   onSchemaTypeChange,
   isDebouncing = false,
 }) => {
+  const routePrefix = getRoutePrefix(contentType);
   const [isSnippetModalOpen, setIsSnippetModalOpen] = useState(false);
   const [newKeywordInput, setNewKeywordInput] = useState('');
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({
@@ -179,7 +184,7 @@ export const SeoSidebar: React.FC<SeoSidebarProps> = ({
           <div className="text-[10px] text-secondary font-mono flex items-center gap-1 truncate">
             <span className="text-on-surface font-semibold">venturegraph.me</span>
             <span>›</span>
-            <span>articles</span>
+            <span>{routePrefix}</span>
             <span>›</span>
             <span className="truncate">{slug || 'post-slug'}</span>
           </div>
@@ -375,7 +380,7 @@ export const SeoSidebar: React.FC<SeoSidebarProps> = ({
             <span>Canonical:</span>
             <span
               className="font-mono text-[10px] text-on-surface truncate max-w-[170px]"
-              title={canonicalUrl || `https://venturegraph.me/articles/${slug || 'post-slug'}`}
+              title={canonicalUrl || `https://venturegraph.me${getCanonicalPostPath(contentType, slug || 'post-slug')}`}
             >
               {canonicalUrl ? 'Custom Canonical' : 'Default Permalink'}
             </span>
@@ -394,6 +399,7 @@ export const SeoSidebar: React.FC<SeoSidebarProps> = ({
         onSlugChange={onSlugChange}
         metaDescription={metaDescription}
         onMetaDescriptionChange={onMetaDescriptionChange}
+        contentType={contentType}
         canonicalUrl={canonicalUrl}
         onCanonicalUrlChange={onCanonicalUrlChange}
         isNoindex={isNoindex}

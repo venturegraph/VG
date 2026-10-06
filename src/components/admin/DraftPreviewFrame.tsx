@@ -1,11 +1,14 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
+import { ContentType } from '@/types';
+import { getCanonicalPostPath } from '@/lib/routes';
 
 type ViewportMode = 'desktop' | 'tablet' | 'mobile';
 
 interface DraftPreviewFrameProps {
   slug: string;
+  contentType?: ContentType;
   previewToken?: string | null;
   isSaved?: boolean;
   onQuickSave?: () => void;
@@ -17,6 +20,7 @@ interface DraftPreviewFrameProps {
 
 export const DraftPreviewFrame: React.FC<DraftPreviewFrameProps> = ({
   slug,
+  contentType = 'case_study',
   previewToken,
   isSaved = true,
   onQuickSave,
@@ -31,8 +35,9 @@ export const DraftPreviewFrame: React.FC<DraftPreviewFrameProps> = ({
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const cleanSlug = slug.trim();
+  const canonicalPath = getCanonicalPostPath(contentType, encodeURIComponent(cleanSlug));
   const previewPath = cleanSlug
-    ? `/articles/${encodeURIComponent(cleanSlug)}?preview=true${
+    ? `${canonicalPath}?preview=true${
         previewToken ? `&preview_token=${encodeURIComponent(previewToken)}` : ''
       }`
     : '';
@@ -114,7 +119,7 @@ export const DraftPreviewFrame: React.FC<DraftPreviewFrameProps> = ({
         <div className="hidden lg:flex items-center gap-1.5 flex-1 max-w-md px-3 py-1 rounded-xl bg-surface-container border border-outline-variant/30 text-secondary font-mono text-[11px] truncate">
           <span className="material-symbols-outlined text-[14px] text-emerald-500">lock</span>
           <span className="truncate">
-            venturegraph.me/articles/{cleanSlug || 'untitled-draft'}?preview=true
+            venturegraph.me{getCanonicalPostPath(contentType, cleanSlug || 'untitled-draft')}?preview=true
           </span>
         </div>
 

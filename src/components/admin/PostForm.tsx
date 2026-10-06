@@ -10,6 +10,7 @@ import { PARENT_TAXONOMY } from '@/lib/taxonomy';
 import { formatStatus } from '@/lib/formatStatus';
 import DOMPurify from 'dompurify';
 import { analyzeSEO, SeoAnalysisResult } from '@/lib/seoAnalysis';
+import { getCanonicalPostPath } from '@/lib/routes';
 
 import { ContentTypeSelect } from './ContentTypeSelect';
 import { SlugField } from './SlugField';
@@ -644,7 +645,7 @@ export const PostForm: React.FC<PostFormProps> = ({
           </div>
           <div className="flex items-center gap-2">
             <Link
-              href={`/articles/${formSuccess.slug}`}
+              href={getCanonicalPostPath(contentType, formSuccess.slug)}
               target="_blank"
               className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold tracking-wider transition-colors flex items-center gap-1 shadow-xs"
             >
@@ -747,6 +748,7 @@ export const PostForm: React.FC<PostFormProps> = ({
             <SlugField
               value={slug}
               title={title}
+              contentType={contentType}
               onChange={(val) => setSlug(val)}
               isTaken={isSlugTaken}
               isChecking={isCheckingSlug}
@@ -870,6 +872,7 @@ export const PostForm: React.FC<PostFormProps> = ({
           <div className="xl:col-span-6 space-y-6 xl:sticky xl:top-20">
             <DraftPreviewFrame
               slug={slug}
+              contentType={contentType}
               previewToken={previewToken}
               isSaved={!isDirty}
               onQuickSave={() => handleSubmit('draft')}
@@ -893,6 +896,7 @@ export const PostForm: React.FC<PostFormProps> = ({
               analysis={seoAnalysis}
               title={title}
               seoTitle={seoTitle}
+              contentType={contentType}
               onSeoTitleChange={(val) => {
                 setSeoTitle(val);
                 setIsDirty(true);
@@ -947,6 +951,7 @@ export const PostForm: React.FC<PostFormProps> = ({
               analysis={seoAnalysis}
               title={title}
               seoTitle={seoTitle}
+              contentType={contentType}
               onSeoTitleChange={(val) => {
                 setSeoTitle(val);
                 setIsDirty(true);
@@ -1014,6 +1019,7 @@ export const PostForm: React.FC<PostFormProps> = ({
           <div className="w-full h-full max-w-7xl max-h-[96vh]">
             <DraftPreviewFrame
               slug={slug}
+              contentType={contentType}
               previewToken={previewToken}
               isSaved={!isDirty}
               onQuickSave={() => handleSubmit('draft')}

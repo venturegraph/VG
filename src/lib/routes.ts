@@ -1,17 +1,26 @@
 /**
  * Centralized canonical path resolver for published posts.
  */
+/**
+ * Returns the URL path prefix segment (without slashes) for a given content type.
+ */
+export function getRoutePrefix(contentType: string | null | undefined): string {
+  if (contentType === 'case_study') {
+    return 'articles';
+  }
+  if (contentType === 'lessons_hub' || contentType === 'lessons') {
+    return 'lessons';
+  }
+  return 'news';
+}
+
 export function getCanonicalPostPath(
   contentType: string | null | undefined,
   slug: string
 ): string {
-  if (contentType === 'case_study') {
-    return `/articles/${slug}`;
-  }
-  if (contentType === 'lessons_hub' || contentType === 'lessons') {
-    return `/lessons/${slug}`;
-  }
-  return `/news/${slug}`;
+  const prefix = getRoutePrefix(contentType);
+  const cleanSlug = slug.replace(/^\/+/, '');
+  return `/${prefix}/${cleanSlug}`;
 }
 
 export function isCaseStudy(contentType: string | null | undefined): boolean {
