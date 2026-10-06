@@ -17,6 +17,14 @@ export interface SeoSidebarProps {
   onFocusKeywordChange: (val: string) => void;
   secondaryKeywords: string[];
   onSecondaryKeywordsChange: (keywords: string[]) => void;
+  canonicalUrl?: string;
+  onCanonicalUrlChange?: (val: string) => void;
+  isNoindex?: boolean;
+  onIsNoindexChange?: (val: boolean) => void;
+  isNofollow?: boolean;
+  onIsNofollowChange?: (val: boolean) => void;
+  schemaType?: 'Article' | 'NewsArticle' | 'TechArticle' | 'FAQPage';
+  onSchemaTypeChange?: (val: 'Article' | 'NewsArticle' | 'TechArticle' | 'FAQPage') => void;
   isDebouncing?: boolean;
 }
 
@@ -33,6 +41,14 @@ export const SeoSidebar: React.FC<SeoSidebarProps> = ({
   onFocusKeywordChange,
   secondaryKeywords,
   onSecondaryKeywordsChange,
+  canonicalUrl = '',
+  onCanonicalUrlChange,
+  isNoindex = false,
+  onIsNoindexChange,
+  isNofollow = false,
+  onIsNofollowChange,
+  schemaType = 'Article',
+  onSchemaTypeChange,
   isDebouncing = false,
 }) => {
   const [isSnippetModalOpen, setIsSnippetModalOpen] = useState(false);
@@ -294,6 +310,79 @@ export const SeoSidebar: React.FC<SeoSidebarProps> = ({
         />
       </div>
 
+      {/* 4. Schema & Robots Directives Card */}
+      <div className="p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 space-y-3 shadow-xs">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-primary text-[16px]">schema</span>
+            <span>Schema &amp; Indexing</span>
+          </span>
+          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-primary/10 text-primary">
+            {schemaType}
+          </span>
+        </div>
+
+        <div className="space-y-2.5 text-xs">
+          {/* Schema Type Dropdown */}
+          <div>
+            <label className="text-[11px] text-secondary font-medium block mb-1">
+              Structured JSON-LD Type
+            </label>
+            <select
+              value={schemaType}
+              onChange={(e) =>
+                onSchemaTypeChange &&
+                onSchemaTypeChange(e.target.value as 'Article' | 'NewsArticle' | 'TechArticle' | 'FAQPage')
+              }
+              className="w-full h-8 px-2.5 rounded-lg bg-surface-container-low border border-outline-variant/40 text-on-surface text-xs focus:outline-hidden focus:border-primary transition-colors cursor-pointer"
+            >
+              <option value="Article">Article (Standard Analysis)</option>
+              <option value="NewsArticle">NewsArticle (Tech News)</option>
+              <option value="TechArticle">TechArticle (Autopsy/Technical)</option>
+              <option value="FAQPage">FAQPage (Q&amp;A Breakdown)</option>
+            </select>
+          </div>
+
+          {/* Quick Robots Directives toggles */}
+          <div className="flex items-center gap-4 pt-1">
+            <label className="flex items-center gap-1.5 cursor-pointer text-xs">
+              <input
+                type="checkbox"
+                checked={isNoindex}
+                onChange={(e) => onIsNoindexChange && onIsNoindexChange(e.target.checked)}
+                className="rounded text-primary focus:ring-primary w-3.5 h-3.5 cursor-pointer"
+              />
+              <span className={isNoindex ? 'text-rose-600 dark:text-rose-400 font-bold' : 'text-secondary'}>
+                Noindex
+              </span>
+            </label>
+
+            <label className="flex items-center gap-1.5 cursor-pointer text-xs">
+              <input
+                type="checkbox"
+                checked={isNofollow}
+                onChange={(e) => onIsNofollowChange && onIsNofollowChange(e.target.checked)}
+                className="rounded text-primary focus:ring-primary w-3.5 h-3.5 cursor-pointer"
+              />
+              <span className={isNofollow ? 'text-amber-600 dark:text-amber-400 font-bold' : 'text-secondary'}>
+                Nofollow
+              </span>
+            </label>
+          </div>
+
+          {/* Canonical Status Preview */}
+          <div className="pt-1 text-[11px] text-secondary flex items-center justify-between border-t border-outline-variant/20">
+            <span>Canonical:</span>
+            <span
+              className="font-mono text-[10px] text-on-surface truncate max-w-[170px]"
+              title={canonicalUrl || `https://venturegraph.me/articles/${slug || 'post-slug'}`}
+            >
+              {canonicalUrl ? 'Custom Canonical' : 'Default Permalink'}
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Snippet Editor Modal */}
       <SnippetEditorModal
         isOpen={isSnippetModalOpen}
@@ -305,6 +394,14 @@ export const SeoSidebar: React.FC<SeoSidebarProps> = ({
         onSlugChange={onSlugChange}
         metaDescription={metaDescription}
         onMetaDescriptionChange={onMetaDescriptionChange}
+        canonicalUrl={canonicalUrl}
+        onCanonicalUrlChange={onCanonicalUrlChange}
+        isNoindex={isNoindex}
+        onIsNoindexChange={onIsNoindexChange}
+        isNofollow={isNofollow}
+        onIsNofollowChange={onIsNofollowChange}
+        schemaType={schemaType}
+        onSchemaTypeChange={onSchemaTypeChange}
       />
     </div>
   );

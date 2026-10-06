@@ -12,6 +12,14 @@ interface SnippetEditorModalProps {
   onSlugChange: (val: string) => void;
   metaDescription: string;
   onMetaDescriptionChange: (val: string) => void;
+  canonicalUrl?: string;
+  onCanonicalUrlChange?: (val: string) => void;
+  isNoindex?: boolean;
+  onIsNoindexChange?: (val: boolean) => void;
+  isNofollow?: boolean;
+  onIsNofollowChange?: (val: boolean) => void;
+  schemaType?: 'Article' | 'NewsArticle' | 'TechArticle' | 'FAQPage';
+  onSchemaTypeChange?: (val: 'Article' | 'NewsArticle' | 'TechArticle' | 'FAQPage') => void;
 }
 
 export const SnippetEditorModal: React.FC<SnippetEditorModalProps> = ({
@@ -24,6 +32,14 @@ export const SnippetEditorModal: React.FC<SnippetEditorModalProps> = ({
   onSlugChange,
   metaDescription,
   onMetaDescriptionChange,
+  canonicalUrl = '',
+  onCanonicalUrlChange,
+  isNoindex = false,
+  onIsNoindexChange,
+  isNofollow = false,
+  onIsNofollowChange,
+  schemaType = 'Article',
+  onSchemaTypeChange,
 }) => {
   // Evaluated SEO Title resolving template tags
   const evaluatedTitle = useMemo(() => {
@@ -58,6 +74,8 @@ export const SnippetEditorModal: React.FC<SnippetEditorModalProps> = ({
       ? 'warning'
       : 'error';
 
+  const defaultPermalink = `https://venturegraph.me/articles/${slug || 'post-slug'}`;
+
   if (!isOpen) return null;
 
   const insertVariable = (variable: string) => {
@@ -74,10 +92,10 @@ export const SnippetEditorModal: React.FC<SnippetEditorModalProps> = ({
             <span className="material-symbols-outlined text-primary text-xl">preview</span>
             <div>
               <h3 className="text-base font-bold text-on-surface">
-                Google Search Snippet Editor
+                Google Search Snippet &amp; Schema Engine
               </h3>
               <p className="text-xs text-secondary">
-                Customize how your post appears across Google SERPs and social previews.
+                Fine-tune SERP presentation, robots crawler directives, and structured JSON-LD schemas.
               </p>
             </div>
           </div>
@@ -110,6 +128,27 @@ export const SnippetEditorModal: React.FC<SnippetEditorModalProps> = ({
           <div className="text-xs text-secondary leading-relaxed break-words line-clamp-2">
             {metaDescription ||
               'Provide a compelling meta description snippet to give searchers a preview of this investigative autopsy...'}
+          </div>
+
+          {/* Quick status indicators for noindex / canonical */}
+          <div className="flex flex-wrap items-center gap-2 pt-2 text-[10px]">
+            {isNoindex ? (
+              <span className="px-2 py-0.5 rounded bg-rose-500/15 text-rose-600 dark:text-rose-400 font-semibold border border-rose-500/30">
+                noindex
+              </span>
+            ) : (
+              <span className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/30">
+                index
+              </span>
+            )}
+            {isNofollow && (
+              <span className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 font-semibold border border-amber-500/30">
+                nofollow
+              </span>
+            )}
+            <span className="px-2 py-0.5 rounded bg-surface-container-high text-secondary font-mono">
+              Schema: @type: {schemaType}
+            </span>
           </div>
         </div>
 
@@ -256,6 +295,97 @@ export const SnippetEditorModal: React.FC<SnippetEditorModalProps> = ({
             <p className="text-[11px] text-secondary">
               Recommended range: 120–160 characters. Search engines truncate snippets over ~920px.
             </p>
+          </div>
+
+          {/* 4. Canonical URL & Schema Type Controls */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-outline-variant/20">
+            {/* Canonical URL */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-primary text-[15px]">link</span>
+                <span>Canonical URL</span>
+              </label>
+              <input
+                type="url"
+                value={canonicalUrl}
+                onChange={(e) => onCanonicalUrlChange && onCanonicalUrlChange(e.target.value)}
+                placeholder={defaultPermalink}
+                className="w-full h-10 px-3 rounded-xl bg-surface-container-lowest border border-outline-variant/40 text-on-surface text-xs font-mono focus:outline-hidden focus:border-primary transition-colors"
+              />
+              <p className="text-[10px] text-secondary">
+                Leave empty to fallback to default permalink: <span className="font-mono text-on-surface truncate block">{defaultPermalink}</span>
+              </p>
+            </div>
+
+            {/* Schema Type Dropdown */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-primary text-[15px]">schema</span>
+                <span>Schema.org Type</span>
+              </label>
+              <select
+                value={schemaType}
+                onChange={(e) =>
+                  onSchemaTypeChange &&
+                  onSchemaTypeChange(e.target.value as 'Article' | 'NewsArticle' | 'TechArticle' | 'FAQPage')
+                }
+                className="w-full h-10 px-3 rounded-xl bg-surface-container-lowest border border-outline-variant/40 text-on-surface text-xs font-medium focus:outline-hidden focus:border-primary transition-colors cursor-pointer"
+              >
+                <option value="Article">Article (Standard Editorial Analysis)</option>
+                <option value="NewsArticle">NewsArticle (Time-Sensitive Industry News)</option>
+                <option value="TechArticle">TechArticle (Deep Technical Autopsy)</option>
+                <option value="FAQPage">FAQPage (Question &amp; Answer Breakdown)</option>
+              </select>
+              <p className="text-[10px] text-secondary">
+                Outputs dynamic <code className="font-mono text-primary font-semibold">@type: &quot;{schemaType}&quot;</code> in Schema JSON-LD.
+              </p>
+            </div>
+          </div>
+
+          {/* 5. Robots Meta Directives (noindex & nofollow) */}
+          <div className="p-4 rounded-xl bg-surface-container-low border border-outline-variant/30 space-y-3">
+            <span className="text-xs font-semibold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-primary text-[15px]">shield</span>
+              <span>Search Crawler Robots Directives</span>
+            </span>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              {/* Noindex Toggle */}
+              <label className="flex items-start gap-3 p-2.5 rounded-lg bg-surface-container-lowest border border-outline-variant/20 hover:border-outline-variant/40 transition-colors cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isNoindex}
+                  onChange={(e) => onIsNoindexChange && onIsNoindexChange(e.target.checked)}
+                  className="mt-0.5 rounded text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                />
+                <div className="text-xs">
+                  <span className="font-semibold text-on-surface block">
+                    Noindex
+                  </span>
+                  <span className="text-[10px] text-secondary">
+                    Instruct search engines not to index or display this dispatch in SERPs.
+                  </span>
+                </div>
+              </label>
+
+              {/* Nofollow Toggle */}
+              <label className="flex items-start gap-3 p-2.5 rounded-lg bg-surface-container-lowest border border-outline-variant/20 hover:border-outline-variant/40 transition-colors cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isNofollow}
+                  onChange={(e) => onIsNofollowChange && onIsNofollowChange(e.target.checked)}
+                  className="mt-0.5 rounded text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                />
+                <div className="text-xs">
+                  <span className="font-semibold text-on-surface block">
+                    Nofollow
+                  </span>
+                  <span className="text-[10px] text-secondary">
+                    Instruct search engines not to follow any hyperlinks in this article.
+                  </span>
+                </div>
+              </label>
+            </div>
           </div>
         </div>
 

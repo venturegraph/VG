@@ -10,6 +10,7 @@ export interface ArticleJsonLdParams {
   publishedAt?: string | null;
   updatedAt?: string | null;
   siteUrl: string;
+  schemaType?: 'Article' | 'NewsArticle' | 'TechArticle' | 'FAQPage' | string | null;
 }
 
 export interface BreadcrumbItem {
@@ -25,10 +26,12 @@ export function generateArticleJsonLd({
   publishedAt,
   updatedAt,
   siteUrl,
+  schemaType,
 }: ArticleJsonLdParams) {
+  const chosenType = schemaType || 'Article';
   return {
     '@context': 'https://schema.org',
-    '@type': 'Article',
+    '@type': chosenType,
     headline: title,
     description: description,
     image: imageUrl ? [imageUrl] : [`${siteUrl}/icon.png`],
@@ -53,6 +56,11 @@ export function generateArticleJsonLd({
     },
   };
 }
+
+/**
+ * Export alias for generateArticleJsonLd supporting dynamic Schema.org types
+ */
+export const generateArticleSchema = generateArticleJsonLd;
 
 export function generateBreadcrumbJsonLd(items: BreadcrumbItem[]) {
   return {

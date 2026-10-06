@@ -26,6 +26,7 @@ interface AdminPostItem {
   isDatabaseRecord: boolean;
   /** 'wordpress_migration' for WP-imported posts, null otherwise */
   importSource: string | null;
+  seoScore: number;
 }
 
 function AdminPostsContent() {
@@ -44,6 +45,10 @@ function AdminPostsContent() {
   // Content type filter tab
   const [activeTypeTab, setActiveTypeTab] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // SEO Score filter ('all' | 'good' | 'average' | 'poor') & Sorting ('updated' | 'seo_desc' | 'seo_asc')
+  const [seoScoreFilter, setSeoScoreFilter] = useState<'all' | 'good' | 'average' | 'poor'>('all');
+  const [sortBy, setSortBy] = useState<'updated' | 'seo_desc' | 'seo_asc'>('updated');
 
   // Database posts state
   const [dbPosts, setDbPosts] = useState<AdminPostItem[]>([]);
@@ -212,6 +217,7 @@ function AdminPostsContent() {
             link: `/articles/${item.slug}`,
             isDatabaseRecord: true,
             importSource: item.import_source ?? null,
+            seoScore: typeof item.seo_score === 'number' ? item.seo_score : 0,
           };
         });
         setDbPosts(mapped);
@@ -401,8 +407,31 @@ function AdminPostsContent() {
       post.authorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.slug.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return matchesStatus && matchesType && matchesSearch && matchesSource;
+    // SEO score filter check
+    const matchesSeo =
+      seoScoreFilter === 'all' ||
+      (seoScoreFilter === 'good' && post.seoScore >= 81) ||
+      (seoScoreFilter === 'average' && post.seoScore >= 51 && post.seoScore <= 80) ||
+      (seoScoreFilter === 'poor' && post.seoScore <= 50);
+
+    return matchesStatus && matchesType && matchesSearch && matchesSource && matchesSeo;
   });
+
+  // Client-side sorting (supports SEO score desc/asc and recently updated)
+  const displayPosts = [...filteredPosts].sort((a, b) => {
+    if (sortBy === 'seo_desc') {
+      return b.seoScore - a.seoScore;
+    }
+    if (sortBy === 'seo_asc') {
+      return a.seoScore - b.seoScore;
+    }
+    // Default 'updated': latest first
+    return new Date(b.rawUpdatedAt).getTime() - new Date(a.rawUpdatedAt).getTime();
+  });
+
+  const handleToggleSeoSort = () => {
+    setSortBy((prev) => (prev === 'seo_desc' ? 'seo_asc' : prev === 'seo_asc' ? 'updated' : 'seo_desc'));
+  };
 
   // Calculate counts
   const totalCount = allPosts.length;
@@ -847,6 +876,48 @@ function AdminPostsContent() {
               </button>
             ))}
           </div>
+
+          {/* Row 3: SEO HEALTH FILTER & SORT SELECTOR */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-outline-variant/15">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+              <span className="text-[11px] font-semibold text-secondary uppercase tracking-wider shrink-0 mr-1">
+                SEO Score:
+              </span>
+              {[
+                { id: 'all', label: 'All Scores' },
+                { id: 'good', label: '81-100 (Optimal)', dot: 'bg-emerald-500' },
+                { id: 'average', label: '51-80 (Fair)', dot: 'bg-amber-500' },
+                { id: 'poor', label: '0-50 (Needs Work)', dot: 'bg-rose-500' },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => setSeoScoreFilter(f.id as any)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-label-md transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                    seoScoreFilter === f.id
+                      ? 'bg-surface-container-highest text-on-surface font-bold shadow-2xs'
+                      : 'text-secondary hover:text-on-surface hover:bg-surface-container'
+                  }`}
+                >
+                  {f.dot && <span className={`w-1.5 h-1.5 rounded-full ${f.dot}`} />}
+                  <span>{f.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 text-xs shrink-0">
+              <span className="text-[11px] text-secondary font-medium">Sort Order:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="h-8 px-2.5 rounded-lg bg-surface-container-low border border-outline-variant/40 text-on-surface text-xs font-medium focus:outline-hidden focus:border-primary transition-colors cursor-pointer"
+              >
+                <option value="updated">Recently Updated</option>
+                <option value="seo_desc">SEO Score: High → Low</option>
+                <option value="seo_asc">SEO Score: Low → High</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         {/* Posts Table */}
@@ -858,6 +929,22 @@ function AdminPostsContent() {
                   <th className="py-3 px-4 font-semibold">Title</th>
                   <th className="py-3 px-4 font-semibold">Type</th>
                   <th className="py-3 px-4 font-semibold">Author</th>
+                  <th
+                    onClick={handleToggleSeoSort}
+                    className="py-3 px-4 font-semibold cursor-pointer hover:text-on-surface transition-colors select-none"
+                    title="Click to sort by SEO score"
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>SEO Score</span>
+                      <span className="material-symbols-outlined text-[14px]">
+                        {sortBy === 'seo_desc'
+                          ? 'arrow_downward'
+                          : sortBy === 'seo_asc'
+                          ? 'arrow_upward'
+                          : 'unfold_more'}
+                      </span>
+                    </div>
+                  </th>
                   <th className="py-3 px-4 font-semibold">Status</th>
                   <th className="py-3 px-4 font-semibold">Last Updated</th>
                   <th className="py-3 px-4 font-semibold text-right">Actions</th>
@@ -866,21 +953,23 @@ function AdminPostsContent() {
               <tbody className="divide-y divide-outline-variant/20 text-xs">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-secondary">
+                    <td colSpan={7} className="py-12 text-center text-secondary">
                       <div className="flex flex-col items-center justify-center gap-2">
                         <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                         <span>Loading dashboard posts...</span>
                       </div>
                     </td>
                   </tr>
-                ) : filteredPosts.length === 0 ? (
+                ) : displayPosts.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-secondary">
+                    <td colSpan={7} className="py-12 text-center text-secondary">
                       <div className="space-y-2">
                         <p className="font-semibold text-on-surface">No posts found.</p>
                         <p className="text-[11px] text-secondary">
                           {statusFilter !== 'all'
                             ? `No records found with status "${formatStatus(statusFilter)}".`
+                            : seoScoreFilter !== 'all'
+                            ? `No posts matched the SEO score filter.`
                             : userRole !== 'admin'
                             ? 'You have not authored any posts in this category yet.'
                             : 'No posts matched your current search and type filters.'}
@@ -898,7 +987,7 @@ function AdminPostsContent() {
                     </td>
                   </tr>
                 ) : (
-                  filteredPosts.map((post) => (
+                  displayPosts.map((post) => (
                     <tr
                       key={post.id}
                       className="hover:bg-surface-container-low/60 transition-colors group"
@@ -971,6 +1060,32 @@ function AdminPostsContent() {
                         <div className="text-[10px] text-secondary font-mono">
                           {post.authorEmail}
                         </div>
+                      </td>
+
+                      {/* SEO Score Column with Color-Coded Health Badge */}
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold border transition-colors ${
+                            post.seoScore >= 81
+                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                              : post.seoScore >= 51
+                              ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                              : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                          }`}
+                          title={`Algorithmic SEO Score: ${post.seoScore} / 100`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              post.seoScore >= 81
+                                ? 'bg-emerald-500'
+                                : post.seoScore >= 51
+                                ? 'bg-amber-500'
+                                : 'bg-rose-500'
+                            }`}
+                          />
+                          <span>{post.seoScore}</span>
+                          <span className="text-[9px] opacity-60 font-sans">/100</span>
+                        </span>
                       </td>
 
                       {/* Status cell formatted with formatStatus */}

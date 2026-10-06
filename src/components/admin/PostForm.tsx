@@ -146,6 +146,20 @@ export const PostForm: React.FC<PostFormProps> = ({
   const [workspaceMode, setWorkspaceMode] = useState<'editor' | 'split' | 'fullscreen_preview'>('editor');
   const [isDirty, setIsDirty] = useState(false);
 
+  // SEO & Schema State
+  const [canonicalUrl, setCanonicalUrl] = useState<string>(
+    initialPost?.canonical_url || ''
+  );
+  const [isNoindex, setIsNoindex] = useState<boolean>(
+    Boolean(initialPost?.is_noindex)
+  );
+  const [isNofollow, setIsNofollow] = useState<boolean>(
+    Boolean(initialPost?.is_nofollow)
+  );
+  const [schemaType, setSchemaType] = useState<'Article' | 'NewsArticle' | 'TechArticle' | 'FAQPage'>(
+    initialPost?.schema_type || 'Article'
+  );
+
   // 2. VG SEO Engine Live SEO Analysis (debounced 500ms)
   const [isDebouncingSeo, setIsDebouncingSeo] = useState(false);
   const [seoAnalysis, setSeoAnalysis] = useState<SeoAnalysisResult>(() =>
@@ -389,6 +403,18 @@ export const PostForm: React.FC<PostFormProps> = ({
           ? resolveSeoTitle(seoTitle, title)
           : null;
 
+      // Calculate fresh SEO score at save time
+      const currentSeo = analyzeSEO({
+        title,
+        seoTitle,
+        slug: cleanSlug,
+        metaDescription,
+        focusKeyword,
+        secondaryKeywords,
+        doc: editorDoc,
+        plainText: editorPlainText,
+      });
+
       const postPayload: Record<string, any> = {
         title: title.trim(),
         seo_title: cleanSeoTitle && cleanSeoTitle !== title.trim() ? cleanSeoTitle : null,
@@ -403,7 +429,11 @@ export const PostForm: React.FC<PostFormProps> = ({
         featured_image_url: featuredImageUrl.trim() || null,
         status: targetStatus,
         updated_at: now,
-        seo_score: seoAnalysis.score,
+        seo_score: currentSeo.score,
+        canonical_url: canonicalUrl.trim() || null,
+        is_noindex: isNoindex,
+        is_nofollow: isNofollow,
+        schema_type: schemaType,
         // Case-study-only fields
         total_raised: contentType === 'case_study' ? totalRaised.trim() : null,
         total_raised_numeric: parsedNumericRaised,
@@ -445,6 +475,11 @@ export const PostForm: React.FC<PostFormProps> = ({
           if (error.code === '42703') {
             if (error.message.includes('total_raised_numeric')) delete postPayload.total_raised_numeric;
             if (error.message.includes('seo_title')) delete postPayload.seo_title;
+            if (error.message.includes('seo_score')) delete postPayload.seo_score;
+            if (error.message.includes('canonical_url')) delete postPayload.canonical_url;
+            if (error.message.includes('is_noindex')) delete postPayload.is_noindex;
+            if (error.message.includes('is_nofollow')) delete postPayload.is_nofollow;
+            if (error.message.includes('schema_type')) delete postPayload.schema_type;
             const retryRes = await supabase
               .from('posts')
               .update(postPayload)
@@ -475,6 +510,11 @@ export const PostForm: React.FC<PostFormProps> = ({
           if (error.code === '42703') {
             if (error.message.includes('total_raised_numeric')) delete postPayload.total_raised_numeric;
             if (error.message.includes('seo_title')) delete postPayload.seo_title;
+            if (error.message.includes('seo_score')) delete postPayload.seo_score;
+            if (error.message.includes('canonical_url')) delete postPayload.canonical_url;
+            if (error.message.includes('is_noindex')) delete postPayload.is_noindex;
+            if (error.message.includes('is_nofollow')) delete postPayload.is_nofollow;
+            if (error.message.includes('schema_type')) delete postPayload.schema_type;
             const retryRes = await supabase
               .from('posts')
               .insert([postPayload])
@@ -877,6 +917,26 @@ export const PostForm: React.FC<PostFormProps> = ({
                 setSecondaryKeywords(val);
                 setIsDirty(true);
               }}
+              canonicalUrl={canonicalUrl}
+              onCanonicalUrlChange={(val) => {
+                setCanonicalUrl(val);
+                setIsDirty(true);
+              }}
+              isNoindex={isNoindex}
+              onIsNoindexChange={(val) => {
+                setIsNoindex(val);
+                setIsDirty(true);
+              }}
+              isNofollow={isNofollow}
+              onIsNofollowChange={(val) => {
+                setIsNofollow(val);
+                setIsDirty(true);
+              }}
+              schemaType={schemaType}
+              onSchemaTypeChange={(val) => {
+                setSchemaType(val);
+                setIsDirty(true);
+              }}
               isDebouncing={isDebouncingSeo}
             />
           </div>
@@ -909,6 +969,26 @@ export const PostForm: React.FC<PostFormProps> = ({
               secondaryKeywords={secondaryKeywords}
               onSecondaryKeywordsChange={(val) => {
                 setSecondaryKeywords(val);
+                setIsDirty(true);
+              }}
+              canonicalUrl={canonicalUrl}
+              onCanonicalUrlChange={(val) => {
+                setCanonicalUrl(val);
+                setIsDirty(true);
+              }}
+              isNoindex={isNoindex}
+              onIsNoindexChange={(val) => {
+                setIsNoindex(val);
+                setIsDirty(true);
+              }}
+              isNofollow={isNofollow}
+              onIsNofollowChange={(val) => {
+                setIsNofollow(val);
+                setIsDirty(true);
+              }}
+              schemaType={schemaType}
+              onSchemaTypeChange={(val) => {
+                setSchemaType(val);
                 setIsDirty(true);
               }}
               isDebouncing={isDebouncingSeo}

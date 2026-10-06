@@ -25,14 +25,15 @@ type ArticleDataResult =
 async function getArticleData(
   slug: string,
   isDraftMode: boolean = false,
-  previewToken?: string
+  previewToken?: string,
+  isPreviewQuery: boolean = false
 ): Promise<ArticleDataResult> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!supabaseUrl || !supabaseAnonKey) return { notFound: true };
 
   try {
-    const isBypassRls = isDraftMode || Boolean(previewToken);
+    const isBypassRls = isDraftMode || Boolean(previewToken) || isPreviewQuery;
     const supabase = isBypassRls
       ? createAdminClient()
       : createClient(supabaseUrl, supabaseAnonKey);
@@ -45,7 +46,7 @@ async function getArticleData(
 
     if (previewToken) {
       query = query.eq('preview_token', previewToken);
-    } else if (!isDraftMode) {
+    } else if (!isDraftMode && !isPreviewQuery) {
       // Public visitors only see published posts where published_at <= now()
       query = query
         .eq('status', 'published')
@@ -152,7 +153,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   const previewToken = searchParams?.preview_token;
   const isPreview = isDraft || Boolean(previewToken) || searchParams?.preview === 'true';
 
-  const result = await getArticleData(params.slug, isDraft, previewToken);
+  const result = await getArticleData(params.slug, isDraft, previewToken, searchParams?.preview === 'true');
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://venturegraph.me';
 
   if (!result || result.notFound) {
@@ -173,8 +174,12 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   const description =
     post.meta_description ||
     (post.content ? stripHtml(post.content).slice(0, 155) + '...' : post.title);
-  const canonicalUrl = `${siteUrl}/articles/${post.slug}`;
+  const defaultCanonical = `${siteUrl}/articles/${post.slug}`;
+  const canonicalUrl = post.canonical_url?.trim() || defaultCanonical;
   const ogImage = post.featured_image_url || `${siteUrl}/icon.png`;
+
+  const isNoindex = Boolean(post.is_noindex);
+  const isNofollow = Boolean(post.is_nofollow);
 
   if (isPreview) {
     return {
@@ -190,6 +195,10 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     alternates: {
       canonical: canonicalUrl,
     },
+    robots: (isNoindex || isNofollow) ? {
+      index: !isNoindex,
+      follow: !isNofollow,
+    } : undefined,
     openGraph: {
       type: 'article',
       url: canonicalUrl,
@@ -218,7 +227,7 @@ export default async function ArticlePage({ params, searchParams }: PageProps) {
   const previewToken = searchParams?.preview_token;
   const isPreview = isDraft || Boolean(previewToken) || searchParams?.preview === 'true';
 
-  const result = await getArticleData(params.slug, isDraft, previewToken);
+  const result = await getArticleData(params.slug, isDraft, previewToken, searchParams?.preview === 'true');
 
   if (!result || result.notFound) {
     notFound();
@@ -242,7 +251,8 @@ export default async function ArticlePage({ params, searchParams }: PageProps) {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://venturegraph.me';
   const post = result.raw;
-  const canonicalUrl = `${siteUrl}/articles/${post.slug}`;
+  const defaultCanonical = `${siteUrl}/articles/${post.slug}`;
+  const canonicalUrl = post.canonical_url?.trim() || defaultCanonical;
   const articleJsonLd = generateArticleJsonLd({
     title: post.title,
     description: post.meta_description || post.title,
@@ -251,6 +261,7 @@ export default async function ArticlePage({ params, searchParams }: PageProps) {
     publishedAt: post.published_at,
     updatedAt: post.updated_at,
     siteUrl,
+    schemaType: post.schema_type,
   });
   const breadcrumbJsonLd = generateBreadcrumbJsonLd([
     { name: 'Home', url: siteUrl },

@@ -157,8 +157,12 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   const description =
     post.meta_description ||
     (post.content ? stripHtml(post.content).slice(0, 155) + '...' : post.title);
-  const canonicalUrl = `${siteUrl}/lessons/${post.slug}`;
+  const defaultCanonical = `${siteUrl}/lessons/${post.slug}`;
+  const canonicalUrl = post.canonical_url?.trim() || defaultCanonical;
   const ogImage = post.featured_image_url || `${siteUrl}/icon.png`;
+
+  const isNoindex = Boolean(post.is_noindex);
+  const isNofollow = Boolean(post.is_nofollow);
 
   if (isPreview) {
     return {
@@ -174,6 +178,10 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     alternates: {
       canonical: canonicalUrl,
     },
+    robots: (isNoindex || isNofollow) ? {
+      index: !isNoindex,
+      follow: !isNofollow,
+    } : undefined,
     openGraph: {
       type: 'article',
       url: canonicalUrl,
@@ -226,7 +234,8 @@ export default async function LessonPage({ params, searchParams }: PageProps) {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://venturegraph.me';
   const post = result.raw;
-  const canonicalUrl = `${siteUrl}/lessons/${post.slug}`;
+  const defaultCanonical = `${siteUrl}/lessons/${post.slug}`;
+  const canonicalUrl = post.canonical_url?.trim() || defaultCanonical;
   const articleJsonLd = generateArticleJsonLd({
     title: post.title,
     description: post.meta_description || post.title,
@@ -235,6 +244,7 @@ export default async function LessonPage({ params, searchParams }: PageProps) {
     publishedAt: post.published_at,
     updatedAt: post.updated_at,
     siteUrl,
+    schemaType: post.schema_type,
   });
   const breadcrumbJsonLd = generateBreadcrumbJsonLd([
     { name: 'Home', url: siteUrl },
