@@ -40,6 +40,8 @@ export const CaseStudyFunnelCard: React.FC<CaseStudyFunnelCardProps> = ({
           .from('posts')
           .select('title, slug, category, meta_description')
           .eq('slug', caseStudySlug)
+          .eq('status', 'published')
+          .lte('published_at', new Date().toISOString())
           .is('deleted_at', null)
           .maybeSingle();
 

@@ -93,6 +93,7 @@ export function SearchView() {
           .from('posts')
           .select('id, title, slug, meta_description, content_type, published_at, category, subcategory, total_raised')
           .eq('status', 'published')
+          .lte('published_at', new Date().toISOString())
           .is('deleted_at', null)
           .or(`title.ilike.%${cleanQuery}%,meta_description.ilike.%${cleanQuery}%,slug.ilike.%${cleanQuery}%,category.ilike.%${cleanQuery}%,subcategory.ilike.%${cleanQuery}%`)
           .order('published_at', { ascending: false })

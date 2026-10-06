@@ -83,7 +83,7 @@ function AdminLoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-on-surface flex flex-col justify-between selection:bg-primary-container selection:text-on-primary">
+    <div className="flex-1 flex flex-col justify-between selection:bg-primary-container selection:text-on-primary">
       {/* Minimal Top Bar */}
       <header className="w-full max-w-[1280px] mx-auto px-4 lg:px-6 py-6 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
@@ -274,11 +274,6 @@ function AdminLoginForm() {
           Protected by Supabase Auth & JWT session encryption.
         </p>
       </main>
-
-      {/* Footer */}
-      <footer className="w-full max-w-[1280px] mx-auto px-4 lg:px-6 py-6 text-center text-xs text-secondary border-t border-outline-variant/20">
-        © 2024 Venture Graph Editorial Systems. All rights reserved.
-      </footer>
     </div>
   );
 }

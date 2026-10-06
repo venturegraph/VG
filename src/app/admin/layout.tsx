@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { AdminFooter } from '@/components/admin/AdminFooter';
 
 export const metadata: Metadata = {
   title: 'Venture Graph Admin',
@@ -14,5 +15,12 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <div className="min-h-screen flex flex-col bg-background text-on-surface">
+      <div className="flex-1 flex flex-col">
+        {children}
+      </div>
+      <AdminFooter />
+    </div>
+  );
 }

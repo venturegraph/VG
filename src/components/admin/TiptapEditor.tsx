@@ -91,7 +91,7 @@ export const TiptapEditor: React.FC<TiptapEditorProps> = ({
   onWordCountChange,
   isDarkMode = false,
   minHeight = 480,
-  placeholder = 'Type your article here, or paste formatted content from WordPress...',
+  placeholder = 'Type your article here, or paste formatted rich text...',
 }) => {
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
@@ -150,7 +150,7 @@ export const TiptapEditor: React.FC<TiptapEditorProps> = ({
         class: `prose prose-sm sm:prose-base max-w-none focus:outline-hidden min-h-[${minHeight}px] px-6 py-5 text-on-surface selection:bg-primary-container selection:text-on-primary`,
         style: `min-height: ${minHeight}px;`,
       },
-      // Tiptap's HTML parser naturally parses pasted WordPress / Google Docs HTML:
+      // Tiptap's HTML parser naturally parses pasted rich text / Google Docs HTML:
       // Preserves h2, h3, h4, strong, em, a, ul, ol, blockquote, img as real nodes
       transformPastedHTML(html) {
         // Basic normalization if needed; Tiptap schema parser handles the rest
@@ -460,7 +460,7 @@ export const TiptapEditor: React.FC<TiptapEditorProps> = ({
         className={`w-full rounded-xl overflow-hidden border border-outline-variant/40 bg-surface-container-lowest focus-within:border-primary transition-all shadow-xs ${isDarkMode ? 'dark' : ''
           }`}
       >
-        {/* Gutenberg / Rank Math Styled Toolbar */}
+        {/* Rich Text / SEO Optimizer Styled Toolbar */}
         <div className="sticky top-0 z-20 flex flex-wrap items-center gap-1 p-2 bg-surface-container-low border-b border-outline-variant/30 backdrop-blur-md">
           {/* Block Type Dropdown / Selectors: Normal, H2, H3, H4 */}
           <div className="flex items-center gap-0.5 bg-surface-container rounded-lg p-0.5 border border-outline-variant/30">
@@ -714,7 +714,7 @@ export const TiptapEditor: React.FC<TiptapEditorProps> = ({
       <div className="flex items-center justify-between text-[11px] text-secondary">
         <span className="flex items-center gap-1">
           <span className="material-symbols-outlined text-[14px] text-primary">verified</span>
-          <span>WordPress Gutenberg HTML paste fully supported. Headings (H2–H4), bold, lists, and links preserved.</span>
+          <span>Rich text &amp; HTML paste fully supported. Headings (H2–H4), bold, lists, and links preserved.</span>
         </span>
         <span>H1 reserved for article title</span>
       </div>

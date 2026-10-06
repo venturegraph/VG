@@ -131,6 +131,14 @@ export interface Post {
   techCategory?: 'ai' | 'ecommerce' | 'saas' | 'fintech';
   fundingRange?: 'under-10m' | '10m-50m' | '50m-100m' | '100m-unicorn';
   fundingTypeCategory?: 'vc-backed' | 'bootstrapped' | 'crowdfunded';
+  // CMS v2.0: Scheduling, Preview & Persistent SEO Metrics
+  preview_token?: string;
+  seo_score?: number;
+  canonical_url?: string;
+  is_noindex?: boolean;
+  is_nofollow?: boolean;
+  schema_type?: 'Article' | 'NewsArticle' | 'TechArticle' | 'FAQPage';
+  is_cornerstone?: boolean;
 }
 
 export interface NavCategoryItem {
@@ -167,7 +175,7 @@ export type ContentType =
   | 'founder_playbook'
   | 'trend_analysis';
 
-export type PostStatus = 'draft' | 'pending_review' | 'published';
+export type PostStatus = 'draft' | 'pending_review' | 'scheduled' | 'published';
 
 export interface PostFormData {
   contentType: ContentType;
@@ -243,4 +251,12 @@ export interface DbPost {
   original_wp_post_id: string | null;
   /** true once the featured image has been reviewed/uploaded via the Image Review tool */
   image_migrated: boolean;
+  // CMS v2.0 additions
+  preview_token?: string;
+  seo_score?: number;
+  canonical_url?: string | null;
+  is_noindex?: boolean;
+  is_nofollow?: boolean;
+  schema_type?: 'Article' | 'NewsArticle' | 'TechArticle' | 'FAQPage' | string | null;
+  is_cornerstone?: boolean;
 }

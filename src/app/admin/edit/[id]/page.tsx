@@ -93,6 +93,13 @@ export default function AdminEditPostPage() {
           hq_country: data.hq_country,
           failure_reason: data.failure_reason,
           author_id: data.author_id,
+          preview_token: data.preview_token || null,
+          seo_score: data.seo_score || 0,
+          canonical_url: data.canonical_url || null,
+          is_noindex: data.is_noindex || false,
+          is_nofollow: data.is_nofollow || false,
+          schema_type: data.schema_type || 'Article',
+          is_cornerstone: data.is_cornerstone || false,
         });
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Failed to load post for editing.';

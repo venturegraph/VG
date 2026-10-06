@@ -413,8 +413,9 @@ function AdminPostsContent() {
   // Status Filter Tabs (IDs are RAW snake_case values)
   const STATUS_TABS: { id: 'all' | PostStatus; label: string }[] = [
     { id: 'all', label: 'All Statuses' },
-    { id: 'pending_review', label: 'Pending Review' },
     { id: 'published', label: 'Published' },
+    { id: 'scheduled', label: 'Scheduled' },
+    { id: 'pending_review', label: 'Pending Review' },
     { id: 'draft', label: 'Drafts' },
   ];
 
@@ -479,7 +480,7 @@ function AdminPostsContent() {
                 href="/admin/import"
                 className="px-3 py-1.5 rounded-lg text-xs font-label-md font-medium text-secondary hover:text-on-surface hover:bg-surface-container transition-colors"
               >
-                WP Import
+                Content Migration
               </Link>
               <Link
                 href="/admin/import/images"
@@ -616,8 +617,8 @@ function AdminPostsContent() {
           <div className="mb-4 p-3.5 rounded-xl bg-violet-500/10 border border-violet-500/25 flex flex-wrap items-center gap-3 text-xs">
             <span className="material-symbols-outlined text-[18px] text-violet-500">move_to_inbox</span>
             <div className="flex-1 min-w-0">
-              <span className="font-semibold text-violet-700 dark:text-violet-300">WordPress migration filter active</span>
-              <span className="text-secondary ml-2">Showing only WP-imported posts{statusFilter !== 'all' ? ` · status: ${statusFilter}` : ''}</span>
+              <span className="font-semibold text-violet-700 dark:text-violet-300">Legacy ingestion filter active</span>
+              <span className="text-secondary ml-2">Showing only migrated posts{statusFilter !== 'all' ? ` · status: ${statusFilter}` : ''}</span>
             </div>
             <button
               type="button"
@@ -928,9 +929,9 @@ function AdminPostsContent() {
                           {post.importSource === 'wordpress_migration' && (
                             <span
                               className="px-1.5 py-0.2 rounded bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/25 font-bold text-[9px] uppercase tracking-wide"
-                              title="Imported from WordPress"
+                              title="Migrated Content"
                             >
-                              WP
+                              Migrated
                             </span>
                           )}
                           <span>•</span>
@@ -978,6 +979,8 @@ function AdminPostsContent() {
                           className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-label-sm text-[10px] font-bold uppercase tracking-wider ${
                             post.status === 'published'
                               ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                              : post.status === 'scheduled'
+                              ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20'
                               : post.status === 'pending_review'
                               ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
                               : 'bg-secondary/15 text-secondary border border-secondary/20'
@@ -987,6 +990,8 @@ function AdminPostsContent() {
                             className={`w-1.5 h-1.5 rounded-full ${
                               post.status === 'published'
                                 ? 'bg-emerald-500'
+                                : post.status === 'scheduled'
+                                ? 'bg-sky-500 animate-pulse'
                                 : post.status === 'pending_review'
                                 ? 'bg-amber-500 animate-pulse'
                                 : 'bg-secondary'
@@ -1081,12 +1086,11 @@ function AdminPostsContent() {
             </table>
           </div>
         </div>
+        {/* Role-based access status line */}
+        <p className="mt-4 text-center text-xs text-secondary/70">
+          Role-based access control active ({formatRole(userRole)} Session)
+        </p>
       </main>
-
-      {/* Admin Footer */}
-      <footer className="w-full max-w-[1400px] mx-auto px-4 lg:px-8 py-6 text-center text-xs text-secondary border-t border-outline-variant/20">
-        Venture Graph CMS — Role-based access control active ({formatRole(userRole)} Session).
-      </footer>
 
       {/* Deletion Confirmation Modal */}
       <ConfirmModal

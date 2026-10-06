@@ -92,6 +92,7 @@ async function getHomeData() {
       .from('posts')
       .select('*')
       .eq('status', 'published')
+      .lte('published_at', new Date().toISOString())
       .is('deleted_at', null)
       .order('published_at', { ascending: false });
 

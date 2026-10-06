@@ -335,7 +335,7 @@ function AdminHeader() {
               + New Post
             </Link>
             <Link href="/admin/import" className="px-3 py-1.5 rounded-lg text-xs font-label-md font-semibold bg-surface-container text-primary">
-              WP Import
+              Content Migration
             </Link>
             <Link href="/admin/import/images" className="px-3 py-1.5 rounded-lg text-xs font-label-md font-medium text-secondary hover:text-on-surface hover:bg-surface-container transition-colors flex items-center gap-1">
               <span className="material-symbols-outlined text-[13px]">image_search</span>
@@ -390,9 +390,9 @@ function DropZone({ onFile, disabled }: { onFile: (f: File) => void; disabled: b
         <span className="material-symbols-outlined text-4xl">upload_file</span>
       </div>
       <div className="text-center">
-        <p className="text-base font-semibold text-on-surface">Drop your WordPress WXR export here</p>
+        <p className="text-base font-semibold text-on-surface">XML Data Ingestion: Drop your export here</p>
         <p className="text-sm text-secondary mt-1">
-          or click to browse — accepts <code className="font-mono text-xs bg-surface-container px-1 py-0.5 rounded">.xml</code> files from WordPress › Tools › Export
+          or click to browse — accepts <code className="font-mono text-xs bg-surface-container px-1 py-0.5 rounded">.xml</code> export files
         </p>
       </div>
       <div className="flex items-center gap-1.5 text-xs text-secondary">
@@ -1208,7 +1208,7 @@ export default function AdminImportPage() {
               <span className="material-symbols-outlined text-xl">move_to_inbox</span>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-on-surface tracking-tight">WordPress Bulk Import</h1>
+              <h1 className="text-xl font-bold text-on-surface tracking-tight">Content Migration (XML Data Ingestion)</h1>
               <p className="text-xs text-secondary">Stage 1 of 3 — Parse, Infer &amp; Review</p>
             </div>
           </div>
@@ -1239,7 +1239,7 @@ export default function AdminImportPage() {
         {isParsing && (
           <div className="flex items-center gap-3 mt-8 text-secondary">
             <span className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-            <span className="text-sm">Parsing WXR file server-side…</span>
+            <span className="text-sm">Parsing XML data server-side…</span>
           </div>
         )}
 

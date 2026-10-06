@@ -9,7 +9,7 @@ import { slugify, resolveSeoTitle } from '@/lib/seo';
 import { PARENT_TAXONOMY } from '@/lib/taxonomy';
 import { formatStatus } from '@/lib/formatStatus';
 import DOMPurify from 'dompurify';
-import { analyzeRankMathSEO, RankMathAnalysisResult } from '@/lib/rankMathAnalysis';
+import { analyzeSEO, SeoAnalysisResult } from '@/lib/seoAnalysis';
 
 import { ContentTypeSelect } from './ContentTypeSelect';
 import { SlugField } from './SlugField';
@@ -18,7 +18,8 @@ import { CategorySelect } from './CategorySelect';
 import { ImageUpload } from './ImageUpload';
 import { CaseStudyFields } from './CaseStudyFields';
 import { StatusActions } from './StatusActions';
-import { RankMathSidebar } from './seo/RankMathSidebar';
+import { SeoSidebar } from './seo/SeoSidebar';
+import { DraftPreviewFrame } from './DraftPreviewFrame';
 
 export interface InitialPostData {
   id: string;
@@ -40,6 +41,14 @@ export interface InitialPostData {
   hq_country?: string | null;
   failure_reason?: string | null;
   author_id?: string;
+  published_at?: string | null;
+  preview_token?: string | null;
+  seo_score?: number | null;
+  canonical_url?: string | null;
+  is_noindex?: boolean | null;
+  is_nofollow?: boolean | null;
+  schema_type?: 'Article' | 'NewsArticle' | 'TechArticle' | 'FAQPage' | null;
+  is_cornerstone?: boolean | null;
 }
 
 interface PostFormProps {
@@ -127,10 +136,20 @@ export const PostForm: React.FC<PostFormProps> = ({
     id: string;
   } | null>(null);
 
-  // 2. Rank Math Live SEO Analysis (debounced 500ms)
+  // Draft Preview & Workspace Mode State
+  const [publishedAt, setPublishedAt] = useState<string | null>(
+    initialPost?.published_at || null
+  );
+  const [previewToken, setPreviewToken] = useState<string | null>(
+    initialPost?.preview_token || null
+  );
+  const [workspaceMode, setWorkspaceMode] = useState<'editor' | 'split' | 'fullscreen_preview'>('editor');
+  const [isDirty, setIsDirty] = useState(false);
+
+  // 2. VG SEO Engine Live SEO Analysis (debounced 500ms)
   const [isDebouncingSeo, setIsDebouncingSeo] = useState(false);
-  const [seoAnalysis, setSeoAnalysis] = useState<RankMathAnalysisResult>(() =>
-    analyzeRankMathSEO({
+  const [seoAnalysis, setSeoAnalysis] = useState<SeoAnalysisResult>(() =>
+    analyzeSEO({
       title: initialPost?.title || '',
       seoTitle:
         initialPost?.seo_title && initialPost.seo_title !== '%title% %sep% %sitename%'
@@ -148,7 +167,7 @@ export const PostForm: React.FC<PostFormProps> = ({
   useEffect(() => {
     setIsDebouncingSeo(true);
     const timer = setTimeout(() => {
-      const res = analyzeRankMathSEO({
+      const res = analyzeSEO({
         title,
         seoTitle,
         slug,
@@ -276,7 +295,10 @@ export const PostForm: React.FC<PostFormProps> = ({
   };
 
   // Form submission handler
-  const handleSubmit = async (targetStatus: PostStatus) => {
+  const handleSubmit = async (
+    targetStatus: PostStatus,
+    scheduledDateIso?: string | null
+  ) => {
     setFormError(null);
     setFormSuccess(null);
 
@@ -381,6 +403,7 @@ export const PostForm: React.FC<PostFormProps> = ({
         featured_image_url: featuredImageUrl.trim() || null,
         status: targetStatus,
         updated_at: now,
+        seo_score: seoAnalysis.score,
         // Case-study-only fields
         total_raised: contentType === 'case_study' ? totalRaised.trim() : null,
         total_raised_numeric: parsedNumericRaised,
@@ -390,11 +413,16 @@ export const PostForm: React.FC<PostFormProps> = ({
         failure_reason: contentType === 'case_study' ? failureReason.trim() : null,
       };
 
+      if (targetStatus === 'scheduled') {
+        postPayload.published_at = scheduledDateIso || publishedAt || now;
+      } else if (targetStatus === 'published') {
+        postPayload.published_at = publishedAt || now;
+      } else {
+        postPayload.published_at = null;
+      }
+
       if (!isEditMode) {
         postPayload.author_id = authorId;
-        postPayload.published_at = targetStatus === 'published' ? now : null;
-      } else if (targetStatus === 'published' && (!initialPost?.status || initialPost.status !== 'published')) {
-        postPayload.published_at = now;
       }
 
       let savedId = initialPost?.id || '';
@@ -405,8 +433,12 @@ export const PostForm: React.FC<PostFormProps> = ({
           .from('posts')
           .update(postPayload)
           .eq('id', initialPost.id)
-          .select('id, slug, status')
+          .select('id, slug, status, preview_token')
           .single();
+
+        if (data?.preview_token) {
+          setPreviewToken(data.preview_token);
+        }
 
         if (error) {
           // Graceful retry if optional columns not yet migrated
@@ -432,8 +464,12 @@ export const PostForm: React.FC<PostFormProps> = ({
         const { data, error } = await supabase
           .from('posts')
           .insert([postPayload])
-          .select('id, slug, status')
+          .select('id, slug, status, preview_token')
           .single();
+
+        if (data?.preview_token) {
+          setPreviewToken(data.preview_token);
+        }
 
         if (error) {
           if (error.code === '42703') {
@@ -463,6 +499,7 @@ export const PostForm: React.FC<PostFormProps> = ({
         slug: cleanSlug,
         status: targetStatus,
       });
+      setIsDirty(false);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'An unexpected error occurred while saving post.';
       setFormError(msg);
@@ -491,11 +528,53 @@ export const PostForm: React.FC<PostFormProps> = ({
           <p className="mt-1 text-xs sm:text-sm text-secondary">
             {isEditMode
               ? `Update and optimize editorial dispatch "${initialPost?.title || title}".`
-              : 'Draft forensic case studies, news dispatches, and tactical founder playbooks with live Rank Math SEO.'}
+              : 'Draft forensic case studies, news dispatches, and tactical founder playbooks with live VG SEO Engine.'}
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Workspace Mode Switcher */}
+          <div className="flex items-center p-1 rounded-xl bg-surface-container border border-outline-variant/30">
+            <button
+              type="button"
+              onClick={() => setWorkspaceMode('editor')}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                workspaceMode === 'editor'
+                  ? 'bg-surface-container-lowest text-primary shadow-xs'
+                  : 'text-secondary hover:text-on-surface'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[15px]">edit_note</span>
+              <span>Editor</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setWorkspaceMode(workspaceMode === 'split' ? 'editor' : 'split')}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                workspaceMode === 'split'
+                  ? 'bg-surface-container-lowest text-primary shadow-xs'
+                  : 'text-secondary hover:text-on-surface'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[15px]">vertical_split</span>
+              <span>Split 50/50</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setWorkspaceMode('fullscreen_preview')}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                workspaceMode === 'fullscreen_preview'
+                  ? 'bg-surface-container-lowest text-primary shadow-xs'
+                  : 'text-secondary hover:text-on-surface'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[15px]">visibility</span>
+              <span>Full Preview</span>
+            </button>
+          </div>
+
           <Link
             href="/admin/posts"
             className="px-3.5 py-2 rounded-xl border border-outline-variant/40 hover:bg-surface-container text-secondary hover:text-on-surface text-xs font-semibold uppercase tracking-wider transition-colors flex items-center gap-1.5"
@@ -579,7 +658,7 @@ export const PostForm: React.FC<PostFormProps> = ({
         </div>
       )}
 
-      {/* Main Two-Column Gutenberg + Rank Math Layout */}
+      {/* Main Two-Column Gutenberg + VG SEO Engine Layout */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -655,10 +734,47 @@ export const PostForm: React.FC<PostFormProps> = ({
 
           {/* Section 3: Tiptap Block Editor */}
           <div className="p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 space-y-4 shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-outline-variant/20">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-[18px]">edit_note</span>
+                <span className="text-xs font-bold text-on-surface uppercase tracking-wider">
+                  Article Body &amp; Intelligence Breakdown
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setWorkspaceMode(workspaceMode === 'split' ? 'editor' : 'split')}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                    workspaceMode === 'split'
+                      ? 'bg-primary/10 text-primary font-semibold'
+                      : 'hover:bg-surface-container text-secondary hover:text-on-surface'
+                  }`}
+                  title="Toggle Split-Screen Live Preview"
+                >
+                  <span className="material-symbols-outlined text-[14px]">vertical_split</span>
+                  <span>{workspaceMode === 'split' ? 'Hide Split' : 'Split Preview'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setWorkspaceMode('fullscreen_preview')}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium hover:bg-surface-container text-secondary hover:text-on-surface transition-colors cursor-pointer"
+                  title="Open Fullscreen Live Preview"
+                >
+                  <span className="material-symbols-outlined text-[14px]">visibility</span>
+                  <span>Live Preview</span>
+                </button>
+              </div>
+            </div>
+
             <TiptapEditor
               value={content}
               postId={initialPost?.id || 'new'}
-              onChange={setContent}
+              onChange={(val) => {
+                setContent(val);
+                setIsDirty(true);
+              }}
               onDocumentChange={setEditorDoc}
               onPlainTextChange={setEditorPlainText}
               isDarkMode={isDarkMode}
@@ -709,34 +825,126 @@ export const PostForm: React.FC<PostFormProps> = ({
           </div>
         </div>
 
-        {/* Right Column (4 cols): Sticky Rank Math SEO Sidebar & Status Actions */}
-        <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-20">
-          <RankMathSidebar
-            analysis={seoAnalysis}
-            title={title}
-            seoTitle={seoTitle}
-            onSeoTitleChange={setSeoTitle}
-            slug={slug}
-            onSlugChange={setSlug}
-            metaDescription={metaDescription}
-            onMetaDescriptionChange={setMetaDescription}
-            focusKeyword={focusKeyword}
-            onFocusKeywordChange={setFocusKeyword}
-            secondaryKeywords={secondaryKeywords}
-            onSecondaryKeywordsChange={setSecondaryKeywords}
-            isDebouncing={isDebouncingSeo}
-          />
-
-          <div className="p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-xs">
-            <StatusActions
-              status={status}
-              onStatusChange={setStatus}
-              onSubmit={(targetStatus) => handleSubmit(targetStatus)}
+        {workspaceMode === 'split' ? (
+          /* Split Right Column (6 cols): Sticky Live Preview Frame + Status & SEO */
+          <div className="xl:col-span-6 space-y-6 xl:sticky xl:top-20">
+            <DraftPreviewFrame
+              slug={slug}
+              previewToken={previewToken}
+              isSaved={!isDirty}
+              onQuickSave={() => handleSubmit('draft')}
               isSubmitting={isSubmitting}
+              onToggleFullscreen={() => setWorkspaceMode('fullscreen_preview')}
+              onClose={() => setWorkspaceMode('editor')}
+            />
+
+            <div className="p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-xs">
+              <StatusActions
+                status={status}
+                onStatusChange={setStatus}
+                publishedAt={publishedAt}
+                onPublishedAtChange={setPublishedAt}
+                onSubmit={(targetStatus, scheduledAt) => handleSubmit(targetStatus, scheduledAt)}
+                isSubmitting={isSubmitting}
+              />
+            </div>
+
+            <SeoSidebar
+              analysis={seoAnalysis}
+              title={title}
+              seoTitle={seoTitle}
+              onSeoTitleChange={(val) => {
+                setSeoTitle(val);
+                setIsDirty(true);
+              }}
+              slug={slug}
+              onSlugChange={(val) => {
+                setSlug(val);
+                setIsDirty(true);
+              }}
+              metaDescription={metaDescription}
+              onMetaDescriptionChange={(val) => {
+                setMetaDescription(val);
+                setIsDirty(true);
+              }}
+              focusKeyword={focusKeyword}
+              onFocusKeywordChange={(val) => {
+                setFocusKeyword(val);
+                setIsDirty(true);
+              }}
+              secondaryKeywords={secondaryKeywords}
+              onSecondaryKeywordsChange={(val) => {
+                setSecondaryKeywords(val);
+                setIsDirty(true);
+              }}
+              isDebouncing={isDebouncingSeo}
+            />
+          </div>
+        ) : (
+          /* Standard Right Column (4 cols): Sticky VG SEO Engine Sidebar & Status Actions */
+          <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-20">
+            <SeoSidebar
+              analysis={seoAnalysis}
+              title={title}
+              seoTitle={seoTitle}
+              onSeoTitleChange={(val) => {
+                setSeoTitle(val);
+                setIsDirty(true);
+              }}
+              slug={slug}
+              onSlugChange={(val) => {
+                setSlug(val);
+                setIsDirty(true);
+              }}
+              metaDescription={metaDescription}
+              onMetaDescriptionChange={(val) => {
+                setMetaDescription(val);
+                setIsDirty(true);
+              }}
+              focusKeyword={focusKeyword}
+              onFocusKeywordChange={(val) => {
+                setFocusKeyword(val);
+                setIsDirty(true);
+              }}
+              secondaryKeywords={secondaryKeywords}
+              onSecondaryKeywordsChange={(val) => {
+                setSecondaryKeywords(val);
+                setIsDirty(true);
+              }}
+              isDebouncing={isDebouncingSeo}
+            />
+
+            <div className="p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-xs">
+              <StatusActions
+                status={status}
+                onStatusChange={setStatus}
+                publishedAt={publishedAt}
+                onPublishedAtChange={setPublishedAt}
+                onSubmit={(targetStatus, scheduledAt) => handleSubmit(targetStatus, scheduledAt)}
+                isSubmitting={isSubmitting}
+              />
+            </div>
+          </div>
+        )}
+      </form>
+
+      {/* Fullscreen Preview Modal Overlay */}
+      {workspaceMode === 'fullscreen_preview' && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
+          <div className="w-full h-full max-w-7xl max-h-[96vh]">
+            <DraftPreviewFrame
+              slug={slug}
+              previewToken={previewToken}
+              isSaved={!isDirty}
+              onQuickSave={() => handleSubmit('draft')}
+              isSubmitting={isSubmitting}
+              isFullscreen={true}
+              onToggleFullscreen={() => setWorkspaceMode('editor')}
+              onClose={() => setWorkspaceMode('editor')}
             />
           </div>
         </div>
-      </form>
+      )}
     </div>
   );
 };

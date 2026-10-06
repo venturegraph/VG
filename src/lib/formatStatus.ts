@@ -1,6 +1,7 @@
 export const STATUS_LABELS: Record<string, string> = {
   draft: 'Draft',
   pending_review: 'Pending Review',
+  scheduled: 'Scheduled',
   published: 'Published',
 };
 

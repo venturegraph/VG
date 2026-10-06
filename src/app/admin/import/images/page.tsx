@@ -85,7 +85,7 @@ function AdminHeader() {
               + New Post
             </Link>
             <Link href="/admin/import" className="px-3 py-1.5 rounded-lg text-xs font-medium text-secondary hover:text-on-surface hover:bg-surface-container transition-colors">
-              WP Import
+              Content Migration
             </Link>
             <Link href="/admin/import/images" className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-surface-container text-amber-600 dark:text-amber-400">
               Image Review
@@ -426,7 +426,7 @@ export default function ImageReviewPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-on-surface tracking-tight">Image Review</h1>
-              <p className="text-xs text-secondary">WordPress migration — upload a replacement featured image for each post</p>
+              <p className="text-xs text-secondary">Content migration — upload a replacement featured image for each post</p>
             </div>
           </div>
 
