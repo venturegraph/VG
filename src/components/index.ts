@@ -21,3 +21,5 @@ export * from './CookieBanner';
 export * from './LegalPageLayout';
 export * from './ReadingProgressBar';
 export * from './ShareBar';
+export * from './ArticleFaqAccordion';
+export * from './ArticleGlossary';

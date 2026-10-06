@@ -20,6 +20,7 @@ import {
   SECONDARY_NAV_ITEMS,
 } from '@/lib/taxonomy';
 import { HubArticle } from '@/types';
+import { enhanceArticleHtml } from '@/lib/editorialEnhancements';
 
 export interface ExtendedHubArticle extends HubArticle {
   htmlContent?: string;
@@ -87,8 +88,8 @@ export function LessonView({
       />
 
       {/* Main Content Area */}
-      <main id="main-content" className="w-full bg-background min-h-screen flex-1 transition-colors duration-200" style={{ paddingTop: 'var(--header-height, 11rem)' }}>
-        <article className="w-full max-w-[1280px] mx-auto px-4 lg:px-6 py-8 lg:py-12">
+      <main id="main-content" className="w-full bg-background min-h-screen flex-1 transition-colors duration-200">
+        <article className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 lg:pt-8 lg:pb-16">
           {/* Breadcrumbs */}
           <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-xs text-secondary font-label-sm">
             <Link href="/" className="hover:text-primary transition-colors">
@@ -103,7 +104,7 @@ export function LessonView({
           </nav>
 
           {/* Hub Header */}
-          <header className="mb-10 max-w-4xl border-b border-outline-variant/30 pb-8">
+          <header className="mb-10 max-w-3xl border-b border-outline-variant/30 pb-8">
             <div className="flex flex-wrap items-center gap-3 mb-4">
               <span className="px-2.5 py-0.5 rounded bg-on-secondary-fixed text-on-secondary font-label-sm text-[11px] uppercase font-bold tracking-wider">
                 {article.category}
@@ -168,7 +169,7 @@ export function LessonView({
           {/* Main Grid: Content & Desktop Sticky TOC */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             {/* Left Column: Content */}
-            <div className={article.lessons && article.lessons.length > 0 ? "lg:col-span-8 flex flex-col font-body-base text-base text-on-surface leading-relaxed" : "lg:col-span-10 lg:col-start-2 flex flex-col font-body-base text-base text-on-surface leading-relaxed"}>
+            <div className={article.lessons && article.lessons.length > 0 ? "lg:col-span-8 max-w-3xl flex flex-col font-body-base text-[18px] text-on-surface leading-[1.8]" : "lg:col-span-10 lg:col-start-2 max-w-3xl flex flex-col font-body-base text-[18px] text-on-surface leading-[1.8]"}>
               {/* Introduction Paragraphs */}
               {article.introduction?.map((para, idx) => (
                 <p
@@ -189,14 +190,16 @@ export function LessonView({
                   ref={articleBodyRef}
                   className="article-html-content prose dark:prose-invert font-body-base text-base text-on-surface leading-relaxed max-w-none my-4"
                   dangerouslySetInnerHTML={{
-                    __html: article.htmlContent.replace(/<img\s+([^>]*?)>/gi, (_match, attrs) => {
-                      let updated = attrs;
-                      if (!/loading=/i.test(updated)) updated += ' loading="lazy"';
-                      if (!/aspect-ratio/i.test(updated) && !/width=/i.test(updated)) {
-                        updated += ' style="aspect-ratio: 16/9; width: 100%; height: auto;"';
-                      }
-                      return `<img ${updated}>`;
-                    }),
+                    __html: enhanceArticleHtml(
+                      article.htmlContent.replace(/<img\s+([^>]*?)>/gi, (_match, attrs) => {
+                        let updated = attrs;
+                        if (!/loading=/i.test(updated)) updated += ' loading="lazy"';
+                        if (!/aspect-ratio/i.test(updated) && !/width=/i.test(updated)) {
+                          updated += ' style="aspect-ratio: 16/9; width: 100%; height: auto;"';
+                        }
+                        return `<img ${updated}>`;
+                      })
+                    ),
                   }}
                 />
               ) : null}
@@ -280,7 +283,7 @@ export function LessonView({
 
             {/* Right Column: Desktop Sticky Table of Contents */}
             {article.lessons && article.lessons.length > 0 && (
-              <div className="hidden lg:block lg:col-span-4">
+              <div className="hidden lg:block lg:col-span-4 w-full">
                 <TableOfContents lessons={article.lessons} />
               </div>
             )}

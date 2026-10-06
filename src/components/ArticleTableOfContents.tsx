@@ -43,7 +43,7 @@ export const ArticleTableOfContents: React.FC<ArticleTableOfContentsProps> = ({ 
     e.preventDefault();
     const element = document.getElementById(id);
     if (element) {
-      const yOffset = -130; // Clean offset for sticky header & primary nav
+      const yOffset = -24; // Clean offset for standard scrolling
       const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: 'smooth' });
       setActiveId(id);

@@ -15,7 +15,7 @@ export const PrimaryNav: React.FC<PrimaryNavProps> = ({
   return (
     <nav
       aria-label="Primary Navigation"
-      className="fixed top-24 left-0 w-full bg-surface-container-low border-b border-outline-variant/30 z-30 shadow-sm transition-colors"
+      className="w-full bg-surface-container-low border-b border-outline-variant/30 relative z-20 shadow-sm transition-colors"
     >
       <div className="max-w-[1280px] mx-auto px-4 lg:px-6">
         {/* ROW 1: Parent categories with dropdowns (Visible by default, child links strictly in elevated dropdowns) */}

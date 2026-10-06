@@ -34,15 +34,15 @@ function getPostPath(contentType: string | null, slug: string): string {
   return `/news/${slug}`;
 }
 
-function getTickerLabel(contentType: string | null): string {
+function getSearchBadgeLabel(contentType: string | null): string {
   switch (contentType) {
-    case 'case_study':        return '[SHUTDOWN]';
-    case 'lessons_hub':       return '[INSIGHT]';
-    case 'lessons':           return '[INSIGHT]';
-    case 'news':              return '[NEWS]';
-    case 'founder_playbook':  return '[PLAYBOOK]';
-    case 'trend_analysis':    return '[TREND]';
-    default:                  return '[LATEST]';
+    case 'case_study':        return 'Case Study';
+    case 'lessons_hub':       return 'Insight';
+    case 'lessons':           return 'Insight';
+    case 'news':              return 'News';
+    case 'founder_playbook':  return 'Playbook';
+    case 'trend_analysis':    return 'Trend';
+    default:                  return 'Article';
   }
 }
 
@@ -83,25 +83,9 @@ export const Header: React.FC<HeaderProps> = ({
     }
   }, []);
 
-  // Publish real rendered header height as CSS variable so pages can offset correctly
+  // Since header is now standard page content in normal flow, reset --header-height to 0px
   useEffect(() => {
-    const el = headerRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        document.documentElement.style.setProperty(
-          '--header-height',
-          `${entry.contentRect.height}px`
-        );
-      }
-    });
-    observer.observe(el);
-    // Set initial value synchronously for the first paint
-    document.documentElement.style.setProperty(
-      '--header-height',
-      `${el.getBoundingClientRect().height}px`
-    );
-    return () => observer.disconnect();
+    document.documentElement.style.setProperty('--header-height', '0px');
   }, []);
 
   // Fetch latest posts for ticker bar
@@ -118,7 +102,7 @@ export const Header: React.FC<HeaderProps> = ({
           .lte('published_at', new Date().toISOString())
           .is('deleted_at', null)
           .order('published_at', { ascending: false })
-          .limit(5);
+          .limit(10);
         if (isMounted && data && data.length > 0) {
           setTickerPosts(data as TickerPost[]);
         }
@@ -242,7 +226,7 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header
       ref={headerRef}
-      className="fixed top-0 left-0 w-full z-50 bg-white dark:bg-slate-dark shadow-sm transition-colors"
+      className="w-full bg-white dark:bg-slate-dark shadow-sm transition-colors relative z-30"
     >
       {/* ── ROW 1: UTILITY BAR ─────────────────────────────────────────────── */}
       <div className="w-full border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-dark">
@@ -406,7 +390,7 @@ export const Header: React.FC<HeaderProps> = ({
                     >
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-accent-orange/10 text-accent-orange uppercase tracking-wider">
-                          {getTickerLabel(item.content_type)}
+                          {getSearchBadgeLabel(item.content_type)}
                         </span>
                         {item.published_at && (
                           <span className="text-[11px] text-gray-400 font-mono">
@@ -551,43 +535,64 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </nav>
 
-      {/* ── ROW 4: TICKER BAR ───────────────────────────────────────────────── */}
-      <aside className="relative z-10 w-full bg-slate-dark text-white overflow-hidden">
+      {/* ── ROW 4: TICKER BAR (Continuous Rolling Marquee) ────────────────── */}
+      <aside className="relative z-10 w-full bg-slate-dark text-white overflow-hidden border-t border-gray-800/80">
         <div className="max-w-[1440px] mx-auto px-6 sm:px-10 h-11 flex items-center">
           {/* LATEST badge */}
-          <div className="flex-shrink-0 flex items-center pr-4 border-r border-gray-700 mr-4">
-            <span className="bg-accent-orange text-white text-[11px] font-extrabold uppercase px-2.5 py-1 tracking-widest leading-none">
+          <div className="flex-shrink-0 flex items-center pr-4 border-r border-gray-700 mr-4 z-20 bg-slate-dark">
+            <span className="bg-accent-orange text-white text-[11px] font-extrabold uppercase px-2.5 py-1 tracking-widest leading-none select-none">
               LATEST
             </span>
           </div>
 
-          {/* Ticker content */}
-          <div className="flex items-center text-xs font-medium text-white overflow-hidden gap-3 min-w-0">
+          {/* Marquee Track Container with subtle fade masks on left and right */}
+          <div className="relative flex-1 overflow-hidden min-w-0 group">
+            {/* Fade masks for smooth entry and exit */}
+            <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-slate-dark to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-dark to-transparent z-10 pointer-events-none" />
+
             {tickerLoading ? (
-              <span className="text-gray-500 animate-pulse">
+              <span className="text-xs font-medium text-gray-500 animate-pulse">
                 Loading latest intelligence...
               </span>
             ) : tickerPosts.length === 0 ? (
-              <span className="text-gray-500">
+              <span className="text-xs font-medium text-gray-500">
                 No recent posts available.
               </span>
             ) : (
-              tickerPosts.map((post, idx) => (
-                <React.Fragment key={post.slug}>
-                  <Link
-                    href={getPostPath(post.content_type, post.slug)}
-                    className="hover:text-accent-orange transition-colors truncate shrink min-w-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-orange rounded-sm"
-                  >
-                    <span className="font-bold text-accent-orange mr-1.5 shrink-0">
-                      {getTickerLabel(post.content_type)}
-                    </span>
-                    {post.title}
-                  </Link>
-                  {idx < tickerPosts.length - 1 && (
-                    <span className="text-gray-600 select-none font-bold shrink-0">|</span>
-                  )}
-                </React.Fragment>
-              ))
+              <div
+                className="flex items-center w-max animate-marquee group-hover:![animation-play-state:paused] hover:![animation-play-state:paused]"
+                style={{ animation: 'marquee 75s linear infinite' }}
+              >
+                {/* Seamless loop: render two duplicate sets of clean article titles */}
+                {(() => {
+                  const basePosts =
+                    tickerPosts.length < 5
+                      ? [...tickerPosts, ...tickerPosts, ...tickerPosts]
+                      : tickerPosts;
+                  const duplicatedPosts = [...basePosts, ...basePosts];
+
+                  return duplicatedPosts.map((post, idx) => (
+                    <div
+                      key={`marquee-${post.slug}-${idx}`}
+                      className="flex items-center gap-6 shrink-0 pr-6"
+                    >
+                      <Link
+                        href={getPostPath(post.content_type, post.slug)}
+                        className="hover:text-accent-orange transition-colors whitespace-nowrap text-xs font-medium text-gray-200 hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-accent-orange"
+                      >
+                        {post.title}
+                      </Link>
+                      <span
+                        className="text-gray-600 select-none font-bold text-[11px]"
+                        aria-hidden="true"
+                      >
+                        •
+                      </span>
+                    </div>
+                  ));
+                })()}
+              </div>
             )}
           </div>
         </div>

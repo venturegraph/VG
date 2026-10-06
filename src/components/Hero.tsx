@@ -9,19 +9,19 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ story }) => {
   return (
-    <section className="relative w-full overflow-hidden bg-inverse-surface text-on-primary" id="hero-case">
-      <div className="relative w-full min-h-[540px] lg:min-h-[620px] flex items-end">
+    <section className="relative w-full overflow-hidden bg-slate-dark text-on-primary" id="hero-case">
+      <div className="relative w-full">
         {/* Background Image & Overlays */}
         <div className="absolute inset-0 z-0">
           {story.image && (
             <HeroImage src={story.image} alt={story.title} />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-inverse-surface via-inverse-surface/80 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-inverse-surface via-inverse-surface/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-dark via-slate-dark/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-dark via-slate-dark/60 to-transparent" />
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 w-full max-w-[1280px] mx-auto px-4 lg:px-6 pt-16 pb-12 lg:pb-16 flex flex-col justify-end">
+        <div className="relative z-10 w-full max-w-[1280px] mx-auto px-4 lg:px-6 pt-6 pb-12 md:pt-8 md:pb-16 flex flex-col justify-end">
           <div className="flex flex-wrap items-center gap-3 mb-4">
             <span className="px-2.5 py-1 rounded bg-primary-container text-on-primary font-label-sm text-xs uppercase tracking-widest font-bold">
               {story.tag || 'Failure Case Study'}

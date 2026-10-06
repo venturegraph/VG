@@ -207,7 +207,7 @@ export const Footer: React.FC = () => {
             <p className="font-medium text-white tracking-wider flex items-center gap-2">
               <span>© {currentYear} Venture Graph. All rights reserved.</span>
               <span className="text-[10px] font-mono text-gray-400 border border-white/10 rounded px-1.5 py-0.5 font-normal tracking-normal">
-                v2.0.0
+                v3.0.0
               </span>
             </p>
             <p className="text-gray-500 max-w-2xl leading-normal">

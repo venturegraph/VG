@@ -5,9 +5,10 @@ import { CaseStudyStats } from '@/types';
 
 interface AtAGlanceStatsProps {
   stats: CaseStudyStats;
+  variant?: 'all' | 'mobile' | 'desktop-card';
 }
 
-export const AtAGlanceStats: React.FC<AtAGlanceStatsProps> = ({ stats }) => {
+export const AtAGlanceStats: React.FC<AtAGlanceStatsProps> = ({ stats, variant = 'all' }) => {
   const [isMobileExpanded, setIsMobileExpanded] = useState(false);
 
   const StatContent = () => (
@@ -90,51 +91,66 @@ export const AtAGlanceStats: React.FC<AtAGlanceStatsProps> = ({ stats }) => {
     </div>
   );
 
+  const desktopCard = (
+    <div className="rounded-xl bg-surface-container-lowest border border-outline-variant/30 px-6 py-6 shadow-sm">
+      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-outline-variant/30">
+        <span className="w-2.5 h-2.5 bg-primary rounded-full" />
+        <h3 className="font-headline-md text-lg text-on-surface font-semibold">
+          At a Glance
+        </h3>
+      </div>
+      <StatContent />
+    </div>
+  );
+
+  const mobileAccordion = (
+    <div className="lg:hidden mb-8 rounded-xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm overflow-hidden">
+      <button
+        className="w-full p-4 flex items-center justify-between text-left hover:bg-surface-container transition-colors"
+        type="button"
+        onClick={() => setIsMobileExpanded(!isMobileExpanded)}
+        aria-expanded={isMobileExpanded}
+      >
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 bg-primary rounded-full" />
+          <span className="font-headline-md text-base font-semibold text-on-surface">
+            At a Glance: Startup Autopsy
+          </span>
+        </div>
+        <div className="flex items-center gap-1 text-xs text-primary font-semibold">
+          <span>{isMobileExpanded ? 'Hide' : 'View Stats'}</span>
+          <span
+            className={`material-symbols-outlined text-[20px] transition-transform duration-200 ${
+              isMobileExpanded ? 'rotate-180' : ''
+            }`}
+          >
+            expand_more
+          </span>
+        </div>
+      </button>
+
+      {isMobileExpanded && (
+        <div className="p-4 pt-0 border-t border-outline-variant/20 bg-surface-container-lowest">
+          <StatContent />
+        </div>
+      )}
+    </div>
+  );
+
+  if (variant === 'desktop-card') {
+    return desktopCard;
+  }
+
+  if (variant === 'mobile') {
+    return mobileAccordion;
+  }
+
   return (
     <>
-      {/* Mobile Collapsible Accordion (Hidden on lg screens) */}
-      <div className="lg:hidden mb-8 rounded-xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm overflow-hidden">
-        <button
-          className="w-full p-4 flex items-center justify-between text-left hover:bg-surface-container transition-colors"
-          type="button"
-          onClick={() => setIsMobileExpanded(!isMobileExpanded)}
-          aria-expanded={isMobileExpanded}
-        >
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 bg-primary rounded-full" />
-            <span className="font-headline-md text-base font-semibold text-on-surface">
-              At a Glance: Startup Autopsy
-            </span>
-          </div>
-          <div className="flex items-center gap-1 text-xs text-primary font-semibold">
-            <span>{isMobileExpanded ? 'Hide' : 'View Stats'}</span>
-            <span
-              className={`material-symbols-outlined text-[20px] transition-transform duration-200 ${
-                isMobileExpanded ? 'rotate-180' : ''
-              }`}
-            >
-              expand_more
-            </span>
-          </div>
-        </button>
-
-        {isMobileExpanded && (
-          <div className="p-4 pt-0 border-t border-outline-variant/20 bg-surface-container-lowest">
-            <StatContent />
-          </div>
-        )}
-      </div>
-
-      {/* Desktop Sticky Sidebar (Hidden on mobile/tablet, sticky on lg screens) */}
+      {mobileAccordion}
       <aside className="hidden lg:block w-full">
-        <div className="sticky top-44 rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-6 shadow-sm">
-          <div className="flex items-center gap-2 mb-4 pb-3 border-b border-outline-variant/30">
-            <span className="w-2.5 h-2.5 bg-primary rounded-full" />
-            <h3 className="font-headline-md text-lg text-on-surface font-semibold">
-              At a Glance
-            </h3>
-          </div>
-          <StatContent />
+        <div className="sticky top-6">
+          {desktopCard}
         </div>
       </aside>
     </>

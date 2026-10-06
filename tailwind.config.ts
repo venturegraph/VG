@@ -60,6 +60,7 @@ const config: Config = {
         // Brand constants — static hex, do NOT flip with dark mode
         'slate-dark': '#21242E',
         'accent-orange': '#FA654D',
+        'brand-red': '#FA654D',
       },
       borderRadius: {
         DEFAULT: '0.125rem',
@@ -115,13 +116,14 @@ const config: Config = {
               fontFamily: 'Newsreader, Georgia, serif',
               fontWeight: '600',
               color: 'inherit',
-              marginTop: '1.5rem',
+              marginTop: '1.75rem',
               marginBottom: '0.5rem',
             },
             p: {
               marginTop: '0',
-              marginBottom: '1.25rem',
-              lineHeight: '1.75',
+              marginBottom: '1.5rem',
+              lineHeight: '1.8',
+              fontSize: '1.125rem',
             },
             blockquote: {
               borderLeftColor: '#FA654D',

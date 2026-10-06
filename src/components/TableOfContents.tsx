@@ -31,7 +31,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ lessons }) => 
   const scrollToLesson = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      const yOffset = -120; // Account for sticky header & nav
+      const yOffset = -24; // Offset for standard viewport scrolling
       const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: 'smooth' });
       setActiveId(id);
@@ -96,7 +96,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ lessons }) => 
 
       {/* Desktop Sticky Sidebar TOC */}
       <aside className="hidden lg:block w-full">
-        <div className="sticky top-44 rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-5 shadow-sm">
+        <div className="sticky top-6 rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-5 shadow-sm">
           <div className="flex items-center justify-between gap-2 pb-3 mb-3 border-b border-outline-variant/30">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px] text-primary">

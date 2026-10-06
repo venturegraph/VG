@@ -30,3 +30,63 @@ export const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
 export function serverSanitizeHtml(dirty: string): string {
   return sanitizeHtml(dirty, SANITIZE_OPTIONS);
 }
+
+/**
+ * Strips redundant embedded Table of Contents blocks from HTML content
+ * (e.g. Tiptap tableOfContents nodes, WordPress ez-toc, wp-block-table-of-contents, rank-math-toc-block)
+ * so that only the dedicated, interactive <ArticleTableOfContents /> component renders above the article body.
+ */
+export function stripEmbeddedTableOfContents(html: string): string {
+  if (!html) return '';
+
+  let cleaned = html;
+
+  // Pattern matching start of TOC container
+  const tocStartRegex = /<(div|nav|aside|section)[^>]*?(?:data-type=["']table-of-contents["']|class=["'][^"']*\b(?:toc-container|wp-block-table-of-contents|ez-toc-container|toc_container|rank-math-toc-block|schema-faq-toc)\b|id=["'](?:ez-toc-container|toc_container)["'])[^>]*>/i;
+
+  let match = tocStartRegex.exec(cleaned);
+  let iterations = 0;
+  while (match && iterations < 50) {
+    iterations++;
+    const startIndex = match.index;
+    const tag = match[1].toLowerCase();
+    const openTag = `<${tag}`;
+    const closeTag = `</${tag}>`;
+
+    // Find matching close tag taking nesting into account
+    let depth = 1;
+    let currentIndex = startIndex + match[0].length;
+    while (depth > 0 && currentIndex < cleaned.length) {
+      const nextOpen = cleaned.toLowerCase().indexOf(openTag, currentIndex);
+      const nextClose = cleaned.toLowerCase().indexOf(closeTag, currentIndex);
+
+      if (nextClose === -1) break;
+
+      if (nextOpen !== -1 && nextOpen < nextClose) {
+        depth++;
+        currentIndex = nextOpen + openTag.length;
+      } else {
+        depth--;
+        currentIndex = nextClose + closeTag.length;
+      }
+    }
+
+    if (depth === 0) {
+      // Also consume optional following empty <p></p>
+      let endIndex = currentIndex;
+      const afterMatch = cleaned.slice(endIndex);
+      const emptyP = /^\s*<p>\s*<\/p>/i.exec(afterMatch);
+      if (emptyP) {
+        endIndex += emptyP[0].length;
+      }
+      cleaned = cleaned.slice(0, startIndex) + cleaned.slice(endIndex);
+    } else {
+      cleaned = cleaned.replace(match[0], '');
+    }
+
+    match = tocStartRegex.exec(cleaned);
+  }
+
+  return cleaned;
+}
+

@@ -117,7 +117,7 @@ async function getArticleData(
       .is('deleted_at', null)
       .neq('slug', slug)
       .order('published_at', { ascending: false })
-      .limit(4);
+      .limit(6);
 
     const relatedCaseStudies: Post[] = (relatedData || []).map((item) => ({
       id: item.id,

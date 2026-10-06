@@ -22,6 +22,8 @@ import {
   SECONDARY_NAV_ITEMS,
 } from '@/lib/taxonomy';
 import { NewsArticle, Post } from '@/types';
+import { stripEmbeddedTableOfContents } from '@/lib/sanitize';
+import { enhanceArticleHtml } from '@/lib/editorialEnhancements';
 
 export interface ExtendedNewsArticle extends NewsArticle {
   htmlContent?: string;
@@ -90,8 +92,8 @@ export function NewsView({
       />
 
       {/* Main Content Area */}
-      <main id="main-content" className="w-full bg-background min-h-screen flex-1 transition-colors duration-200" style={{ paddingTop: 'var(--header-height, 11rem)' }}>
-        <article className="w-full max-w-[1040px] mx-auto px-4 lg:px-6 py-6 lg:py-8">
+      <main id="main-content" className="w-full bg-background min-h-screen flex-1 transition-colors duration-200">
+        <article className="w-full max-w-[1040px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 lg:pt-8 lg:pb-16">
           {/* Breadcrumb & Live Dispatch Pill */}
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3 text-xs font-label-sm">
             <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-secondary">
@@ -211,7 +213,7 @@ export function NewsView({
                 ref={articleBodyRef}
                 className="article-html-content prose dark:prose-invert font-body-base text-base text-on-surface leading-relaxed max-w-3xl"
                 dangerouslySetInnerHTML={{
-                  __html: article.htmlContent,
+                  __html: enhanceArticleHtml(stripEmbeddedTableOfContents(article.htmlContent)),
                 }}
               />
             ) : (

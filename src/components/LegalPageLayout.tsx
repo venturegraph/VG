@@ -63,12 +63,8 @@ export const LegalPageLayout: React.FC<LegalPageLayoutProps> = ({
       />
 
       {/* MAIN CONTENT */}
-      <main
-        id="main-content"
-        className="w-full flex-1"
-        style={{ paddingTop: 'var(--header-height, 11rem)' }}
-      >
-        <div className="max-w-[900px] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+      <main id="main-content" className="w-full flex-1">
+        <div className="max-w-[900px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 lg:pt-8 lg:pb-16">
           {/* Header Block */}
           <div className="border-b border-outline-variant/30 pb-8 mb-10">
             <span className="text-[11px] font-black uppercase tracking-[0.08em] text-accent-orange block mb-2">

@@ -99,8 +99,7 @@ export const ReadingProgressBar: React.FC<ReadingProgressBarProps> = ({
 
   return (
     <div
-      className="fixed left-0 right-0 w-full h-[3px] bg-transparent z-[60] pointer-events-none"
-      style={{ top: 'var(--header-height, 11rem)' }}
+      className="fixed top-0 left-0 right-0 w-full h-[3px] bg-transparent z-[60] pointer-events-none"
       aria-hidden="true"
     >
       <div

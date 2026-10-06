@@ -80,7 +80,7 @@ export function HomeView({
 
 
       {/* Main Content Area */}
-      <main id="main-content" className="w-full bg-background min-h-screen flex-1 transition-colors duration-200" style={{ paddingTop: 'var(--header-height, 11rem)' }}>
+      <main id="main-content" className="w-full bg-background min-h-screen flex-1 transition-colors duration-200">
         {/* SECTION 1: HERO — SINGLE MOST RECENT CASE STUDY */}
         {heroStory && <Hero story={heroStory} />}
 

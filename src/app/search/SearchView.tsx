@@ -152,13 +152,9 @@ export function SearchView() {
       />
 
       {/* Main Search View */}
-      <main
-        id="main-content"
-        className="w-full flex-1"
-        style={{ paddingTop: 'var(--header-height, 11rem)' }}
-      >
+      <main id="main-content" className="w-full flex-1">
         {/* Search Header Banner */}
-        <section className="w-full bg-surface-container-low border-b border-outline-variant/30 py-8 lg:py-12">
+        <section className="w-full bg-surface-container-low border-b border-outline-variant/30 pt-6 pb-8 lg:pt-8 lg:pb-12">
           <div className="max-w-[1040px] mx-auto px-4 sm:px-6">
             <span className="text-[11px] font-black uppercase tracking-[0.08em] text-accent-orange block mb-2 font-label-sm">
               Archive Search

@@ -139,13 +139,9 @@ export function ContactView() {
         secondaryItems={SECONDARY_NAV_ITEMS}
       />
 
-      <main
-        id="main-content"
-        className="w-full flex-1"
-        style={{ paddingTop: 'var(--header-height, 11rem)' }}
-      >
+      <main id="main-content" className="w-full flex-1">
         {/* Masthead Header */}
-        <section className="w-full bg-surface-container-low border-b border-outline-variant/30 py-10 lg:py-16">
+        <section className="w-full bg-surface-container-low border-b border-outline-variant/30 pt-6 pb-10 lg:pt-8 lg:pb-16">
           <div className="max-w-[960px] mx-auto px-4 sm:px-6 lg:px-8">
             <span className="text-[11px] font-black uppercase tracking-[0.08em] text-accent-orange block mb-2 font-label-sm">
               Confidential &amp; Verified Desk
